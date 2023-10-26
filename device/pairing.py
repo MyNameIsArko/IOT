@@ -2,11 +2,14 @@ import network
 import ujson
 import usocket
 import os
-from time import sleep
+import password_generator
+import time
+
+password = password_generator.generate_password(8)
 
 # Set up device as access point
 ap = network.WLAN(network.AP_IF)
-ap.config(essid='ESP32-MP', password='filipek123', authmode=network.AUTH_WPA_WPA2_PSK)
+ap.config(essid='ESP32-MP', password=password, authmode=network.AUTH_WPA_WPA2_PSK)
 
 # Set up as wifi
 sta = network.WLAN(network.STA_IF)
@@ -35,15 +38,17 @@ def enter_pairing():
         connect_to_wifi(config['ssid'], config['password'])
 
 def setup_AP():
+    global password
     if sta.active():
         sta.active(False)
-        sleep(1)
+        time.sleep(1)
 
     if not ap.active():
         ap.active(True)
-        sleep(1)
+        time.sleep(1)
 
     print('Access point IP address:', ap.ifconfig()[0])
+    print('Access point password:', password)
 
     while True:
         conn, addr = s.accept()
@@ -97,17 +102,17 @@ def setup_AP():
 def connect_to_wifi(ssid, password):
     if ap.active():
         ap.active(False)
-        sleep(1)
+        time.sleep(1)
     if not sta.active():
         sta.active(True)
-        sleep(1)
+        time.sleep(1)
     sta.connect(ssid, password)
     timer = 0
     while not sta.isconnected():
         if timer > 10:
             os.remove('config.json')
             break
-        sleep(1)
+        time.sleep(1)
         timer += 1
     if sta.isconnected():
         print('Connected to the network')
