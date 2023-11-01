@@ -1,12 +1,27 @@
 package com.fgieracki.iotapplication.ui.application.viewModels
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.fgieracki.iotapplication.data.DefaultRepository
+import com.fgieracki.iotapplication.data.Repository
+import com.fgieracki.iotapplication.data.local.ContextCatcher
 import com.fgieracki.iotapplication.data.model.LoginInputFields
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class SignInViewModel() : ViewModel() {
+class SignInViewModel(private val repository: Repository = DefaultRepository()) : ViewModel() {
+    private var USER_TOKEN = "Token"
+    private val sharedPreference =  ContextCatcher.getContext().getSharedPreferences("USER_DATA", Context.MODE_PRIVATE)
+
+    private fun getToken() {
+        val token: String = sharedPreference.getString("USER_TOKEN", "Token")?:"Token"
+        USER_TOKEN = token
+    }
+
     val inputFields: MutableStateFlow<LoginInputFields> = MutableStateFlow(LoginInputFields())
 
     val navChannel = MutableSharedFlow<String>(extraBufferCapacity = 1)
@@ -39,16 +54,38 @@ class SignInViewModel() : ViewModel() {
     }
 
     fun login() {
-        //TODO: process data
-        clearInputs()
-        navChannel.tryEmit("OK")
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = repository.login(inputFields.value.username, inputFields.value.password)
+            if (response.isSuccessful) {
+                val token = response.body()?.token
+                token?.let {}
+                USER_TOKEN = token!!
+                val editor = sharedPreference.edit()
+                editor.putString("USER_TOKEN", token)
+                editor.apply()
+
+                clearInputs()
+                navChannel.tryEmit("OK")
+            }
+
+            else {
+                toastChannel.emit("Login failed: " + response.body()?.message)
+            }
+        }
     }
 
     fun register() {
         if(!validateInputs()) return;
-        //TODO: register
 
-        login()
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = repository.register(inputFields.value.username, inputFields.value.password)
+            if (response.isSuccessful) {
+                toastChannel.tryEmit("Registration successful")
+                login()
+            } else {
+                toastChannel.emit("Registration failed: " + response.body()?.message)
+            }
+        }
     }
 
     private fun validateInputs(): Boolean {
@@ -71,7 +108,6 @@ class SignInViewModel() : ViewModel() {
             toastChannel.tryEmit("Username cannot contain whitespace")
             return false
         }
-
         return true
     }
 
@@ -91,7 +127,6 @@ class SignInViewModel() : ViewModel() {
             toastChannel.tryEmit("Password cannot contain whitespace")
             return false
         }
-
         return true
     }
 
