@@ -1,12 +1,12 @@
 import urequests
 
 class APIClient:
-    def __init__(self, api_url):
+    def __init__(self):
         # api/Device/register
         # do authorization wkładam token
         # w body przesyłam {'Mac': mac}
         # kod 200 jak dodane, kod 401 jak token zły, kod 400 jak coś po stronie serwa
-        self.url = api_url
+        self.url = 'TO GET/api/Device/register'
 
     def send_info(self, mac, jwt_token):
         header = {

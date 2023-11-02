@@ -3,15 +3,14 @@ import machine
 import time
 
 class Broker:
-    def __init__(self, mqtt_ip, mac, topic_for_temperature, topic_for_humidity, sensor):
+    def __init__(self, mac, sensor):
         # dwa topici, jeden temperature  i jeden humidity
         # topic to mac/temperature  mac/humidity
-        # self.client_id = ubinascii.hexlify(machine.unique_id())
-        self.client_id = mac
-        self.mqtt_ip = mqtt_ip
+        self.client_id = ubinascii.hexlify(machine.unique_id())
+        self.mqtt_ip = 'TO GET'
 
-        self.temperature_topic = topic_for_temperature
-        self.humidity_topic = topic_for_humidity
+        self.temperature_topic = f'{mac}/temperature'
+        self.humidity_topic = f'{mac}/humidity'
         self.sensor = sensor
 
         try:
