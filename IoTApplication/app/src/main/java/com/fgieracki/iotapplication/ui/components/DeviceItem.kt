@@ -22,8 +22,9 @@ fun DeviceItem(device: Device, deleteDevice: (Device) -> Unit = {}) {
     val menuExpanded = remember { mutableStateOf(false) }
 
     ListItem(
-        headlineText = { Text(text = device.name) },
-        supportingText = { Text(text = if (device.status) device.type + ": " + device.value else "OFF") },
+        headlineText = { Text(text = device.mac) },
+        overlineText = { Text(text = "Last update: " + device.lastTemperatureUpdateTimestamp.toString()) },
+        supportingText = { Text(text = if (device.state) "Temperature: " + device.temperature + ", humidity: " + device.humidity else "OFF") },
         trailingContent = {
             IconButton(
                 onClick = { menuExpanded.value = !menuExpanded.value }

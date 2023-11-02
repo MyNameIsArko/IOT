@@ -1,26 +1,49 @@
 package com.fgieracki.iotapplication.ui.application.viewModels
 
+import android.os.Handler
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.fgieracki.iotapplication.data.DefaultRepository
+import com.fgieracki.iotapplication.data.Repository
 import com.fgieracki.iotapplication.data.model.Device
+import com.fgieracki.iotapplication.data.model.Resource
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
-class HomeViewModel() : ViewModel() {
-    val _devices = listOf<Device>(
-        Device(1, "Device1", true, "TEMPERATURE", "15"),
-        Device(2, "Device2", false, "TEMPERATURE", "15"),
-        Device(3, "Device3", true, "TEMPERATURE", "15"),
-        Device(4, "Device4", false, "TEMPERATURE", "15"),
-        Device(5, "Device5", true, "TEMPERATURE", "15"),
-    )
+class HomeViewModel(private val repository: Repository = DefaultRepository()) : ViewModel() {
+    var devicesFlow: MutableStateFlow<List<Device>> = MutableStateFlow(emptyList())
 
-    val devices: MutableStateFlow<List<Device>> = MutableStateFlow(_devices)
+
+    val navChannel = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    private val _toastChannel = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val toastChannel = _toastChannel
+
+    lateinit var mainHandler: Handler
+    private val updateDataTask = object : Runnable {
+        override fun run() {
+            updateDevicesState()
+            mainHandler.postDelayed(this, 10000)
+        }
+    }
+
+    fun updateDevicesState() {
+        viewModelScope.launch() {
+            val resource = repository.getDevices()
+            if(resource is Resource.Success) {
+                devicesFlow.value = resource.data!!
+            }
+            else if (resource.code == 401) {
+                println("Unauthorized")
+                _toastChannel.tryEmit("Session expired")
+                navChannel.tryEmit("logout")
+            }
+        }
+    }
 
     fun deleteDevice(device: Device) {
         println("Delete device: $device")
-        devices.value = devices.value.filter { it.id != device.id }
-
     }
 
-    fun addDevice() {}
 
 }
