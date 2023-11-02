@@ -1,15 +1,17 @@
 from umqttsimple import MQTTClient
-import ubinascii
-import ujson
 import machine
 import time
 
 class Broker:
-    def __init__(self, mqtt_ip, topic_to_push, sensor):
-        self.client_id = ubinascii.hexlify(machine.unique_id())
+    def __init__(self, mqtt_ip, mac, topic_for_temperature, topic_for_humidity, sensor):
+        # dwa topici, jeden temperature  i jeden humidity
+        # topic to mac/temperature  mac/humidity
+        # self.client_id = ubinascii.hexlify(machine.unique_id())
+        self.client_id = mac
         self.mqtt_ip = mqtt_ip
 
-        self.topic = topic_to_push
+        self.temperature_topic = topic_for_temperature
+        self.humidity_topic = topic_for_humidity
         self.sensor = sensor
 
         try:
@@ -36,8 +38,10 @@ class Broker:
             try:
                 if (time.time() - last_message) > message_interval:
                     json_measurements = self.sensor.get_measurement()
-                    msg = str.encode(ujson.dumps(json_measurements))
-                    self.client.publish(self.topic, msg)
+                    temperature_msg = str.encode(json_measurements['temperature'])
+                    humidity_msg = str.encode(json_measurements['humidity'])
+                    self.client.publish(self.temperature_topic, temperature_msg)
+                    self.client.publish(self.humidity_topic, humidity_msg)
                     last_message = time.time()
             except OSError:
                 self.restart_and_reconnect()
