@@ -4,8 +4,10 @@ import usocket
 import os
 import password_generator
 import time
+import picoweb
+from picoweb.utils import parse_qs
 
-password = password_generator.generate_password(8)
+password = '$!^h9cg%NjX$cx0WgIdl'
 
 # Set up device as access point
 ap = network.WLAN(network.AP_IF)
@@ -14,10 +16,23 @@ ap.config(essid='ESP32-MP', password=password, authmode=network.AUTH_WPA_WPA2_PS
 # Set up as wifi
 sta = network.WLAN(network.STA_IF)
 
-# Serve website to input Wi-Fi credentials
-s = usocket.socket()
-s.bind(('0.0.0.0', 80))
-s.listen(1)
+# Serve API to input Wi-Fi credentials
+app = picoweb.WebApp(__name__)
+
+
+@app.route("/")
+def send(req, resp):
+    queryString = req.qs
+    parameters = parse_qs(queryString)
+    print(parameters)
+
+    if all(item in parameters.keys() for item in ['ssid', 'password', 'jwt']):
+        yield from picoweb.start_response(resp)
+        yield from resp.awrite("Received")
+    else:
+        yield from picoweb.start_response(resp, status='400')
+        yield from resp.awrite("Bad request")
+
 
 def enter_pairing():
     print('Starting connecting to network')
@@ -38,7 +53,6 @@ def enter_pairing():
         connect_to_wifi(config['ssid'], config['password'])
 
 def setup_AP():
-    global password
     if sta.active():
         sta.active(False)
         time.sleep(1)
@@ -50,54 +64,56 @@ def setup_AP():
     print('Access point IP address:', ap.ifconfig()[0])
     print('Access point password:', password)
 
-    while True:
-        conn, addr = s.accept()
-        request = conn.recv(1024)
+    app.run(debug=True,host="0.0.0.0",port=80)
 
-        # Check if request contains Wi-Fi credentials
-        if b'ssid=' in request and b'password=' in request:
-            # Save Wi-Fi credentials to configuration file
-            ssid = request.split(b'ssid=')[1].split(b'&')[0].decode()
-            password = request.split(b'password=')[1].split(b'&')[0].decode()
-            with open('config.json', 'w') as f:
-                ujson.dump({'ssid': ssid, 'password': password}, f)
+    # while True:
+    #     conn, addr = s.accept()
+    #     request = conn.recv(1024)
 
-            # Send response to client
-            response = """<!DOCTYPE html>
-                            <html>
-                            <head>
-                                <title>Wi-Fi Credentials</title>
-                            </head>
-                            <body>
-                                <h1>Wi-Fi Credentials Saved</h1>
-                                <p>Your Wi-Fi credentials have been saved. You can now close this page and connect to your Wi-Fi network.</p>
-                            </body>
-                            </html>"""
-            conn.send(response)
-            conn.close()
-            print('Trying to connect to wifi with provided details...')
-            connect_to_wifi(ssid, password)
-            break
-        else:
-            # Send website to client
-            response = """<!DOCTYPE html>
-                            <html>
-                            <head>
-                                <title>Wi-Fi Credentials</title>
-                            </head>
-                            <body>
-                                <h1>Wi-Fi Credentials</h1>
-                                <form method="post">
-                                    <label for="ssid">SSID:</label><br>
-                                    <input type="text" id="ssid" name="ssid"><br>
-                                    <label for="password">Password:</label><br>
-                                    <input type="password" id="password" name="password"><br><br>
-                                    <input type="submit" value="Submit">
-                                </form>
-                            </body>
-                            </html>"""
-            conn.send(response)
-            conn.close()
+    #     # Check if request contains Wi-Fi credentials
+    #     if b'ssid=' in request and b'password=' in request:
+    #         # Save Wi-Fi credentials to configuration file
+    #         ssid = request.split(b'ssid=')[1].split(b'&')[0].decode()
+    #         password = request.split(b'password=')[1].split(b'&')[0].decode()
+    #         with open('config.json', 'w') as f:
+    #             ujson.dump({'ssid': ssid, 'password': password}, f)
+
+    #         # Send response to client
+    #         response = """<!DOCTYPE html>
+    #                         <html>
+    #                         <head>
+    #                             <title>Wi-Fi Credentials</title>
+    #                         </head>
+    #                         <body>
+    #                             <h1>Wi-Fi Credentials Saved</h1>
+    #                             <p>Your Wi-Fi credentials have been saved. You can now close this page and connect to your Wi-Fi network.</p>
+    #                         </body>
+    #                         </html>"""
+    #         conn.send(response)
+    #         conn.close()
+    #         print('Trying to connect to wifi with provided details...')
+    #         connect_to_wifi(ssid, password)
+    #         break
+    #     else:
+    #         # Send website to client
+    #         response = """<!DOCTYPE html>
+    #                         <html>
+    #                         <head>
+    #                             <title>Wi-Fi Credentials</title>
+    #                         </head>
+    #                         <body>
+    #                             <h1>Wi-Fi Credentials</h1>
+    #                             <form method="post">
+    #                                 <label for="ssid">SSID:</label><br>
+    #                                 <input type="text" id="ssid" name="ssid"><br>
+    #                                 <label for="password">Password:</label><br>
+    #                                 <input type="password" id="password" name="password"><br><br>
+    #                                 <input type="submit" value="Submit">
+    #                             </form>
+    #                         </body>
+    #                         </html>"""
+    #         conn.send(response)
+    #         conn.close()
 
 def connect_to_wifi(ssid, password):
     if ap.active():
