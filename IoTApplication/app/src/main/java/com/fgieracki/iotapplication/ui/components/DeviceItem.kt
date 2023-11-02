@@ -23,6 +23,7 @@ fun DeviceItem(device: Device, deleteDevice: (Device) -> Unit = {}) {
 
     ListItem(
         headlineText = { Text(text = device.mac) },
+        overlineText = { Text(text = "Last update: " + device.lastTemperatureUpdateTimestamp.toString()) },
         supportingText = { Text(text = if (device.state) "Temperature: " + device.temperature + ", humidity: " + device.humidity else "OFF") },
         trailingContent = {
             IconButton(

@@ -2,18 +2,15 @@ package com.fgieracki.iotapplication.data
 
 import android.content.Context
 import com.fgieracki.iotapplication.data.api.IoTWebService
-import com.fgieracki.iotapplication.data.api.model.DeviceResponse
 import com.fgieracki.iotapplication.data.api.model.LoginData
 import com.fgieracki.iotapplication.data.api.model.LoginResponse
 import com.fgieracki.iotapplication.data.api.model.StringResponse
 import com.fgieracki.iotapplication.data.api.model.toDevice
 import com.fgieracki.iotapplication.data.local.ContextCatcher
 import com.fgieracki.iotapplication.data.model.Device
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import retrofit2.Response
+import com.fgieracki.iotapplication.data.model.Resource
 
-class DefaultRepository : Repository {
+class DefaultRepository : Repository() {
     private val api = IoTWebService.api
     private val deviceApi = IoTWebService.deviceApi
 
@@ -25,37 +22,36 @@ class DefaultRepository : Repository {
         USER_TOKEN = token
     }
 
-    override suspend fun login(username: String, password: String): Response<LoginResponse> {
+    override suspend fun login(username: String, password: String): Resource<LoginResponse> {
 
-        return api.login(LoginData(username, password))
+        return safeApiCall{ api.login(LoginData(username, password)) }
     }
 
-    override suspend fun register(username: String, password: String): Response<StringResponse> {
-        return api.register(LoginData(username, password))
+    override suspend fun register(username: String, password: String): Resource<StringResponse> {
+        return safeApiCall{ api.register(LoginData(username, password)) }
     }
 
-    override fun getDevices(): Flow<List<Device>> = flow<List<Device>> {
-        getToken()
-        val response = api.getDevices(token = USER_TOKEN)
+    override suspend fun getDevices(): Resource<List<Device>>  {
 
-        if (response.isSuccessful) {
-           val devicesResponse: List<DeviceResponse> = response.body()!!
-            emit(devicesResponse.map { it.toDevice() })
+        val apiDevices = safeApiCall{ api.getDevices(token = USER_TOKEN) }
+        if(apiDevices is Resource.Success) {
+            val devices = apiDevices.data!!.map { it.toDevice() }
+            return Resource.Success(devices)
         }
-        else {
-            emit(listOf())
-        }
+
+        return Resource.Error(apiDevices.message!!, apiDevices.code!!)
+
     }
 
-    override suspend fun addDevice(device: Device): Boolean {
+    override suspend fun addDevice(device: Device): Resource<Boolean> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun deleteDevice(device: Device): Boolean {
+    override suspend fun deleteDevice(device: Device): Resource<Boolean> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun updateDevice(device: Device): Boolean {
+    override suspend fun updateDevice(device: Device): Resource<Boolean> {
         TODO("Not yet implemented")
     }
 

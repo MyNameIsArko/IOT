@@ -50,6 +50,12 @@ object IoTWebService {
 
         @GET("api/Device/list")
         suspend fun getDevices(@Header("Authorization") token: String): Response<List<DeviceResponse>>
+
+        @GET("api/auth/validateToken")
+        suspend fun validateToken(@Header("Authorization") token: String): Response<StringResponse>
+
+        @GET("api/Device/LatestDeviceCount")
+        suspend fun getLatestDeviceCount(@Header("Authorization") token: String): Response<StringResponse>
     }
 
     interface DeviceApi {

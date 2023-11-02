@@ -3,14 +3,13 @@ package com.fgieracki.iotapplication.data
 import com.fgieracki.iotapplication.data.api.model.LoginResponse
 import com.fgieracki.iotapplication.data.api.model.StringResponse
 import com.fgieracki.iotapplication.data.model.Device
-import kotlinx.coroutines.flow.Flow
-import retrofit2.Response
+import com.fgieracki.iotapplication.data.model.Resource
 
-interface Repository {
-    suspend fun login(username: String, password: String): Response<LoginResponse>
-    suspend fun register(username: String, password: String): Response<StringResponse>
-    fun getDevices(): Flow<List<Device>>
-    suspend fun addDevice(device: Device): Boolean
-    suspend fun deleteDevice(device: Device): Boolean
-    suspend fun updateDevice(device: Device): Boolean
+abstract class Repository : BaseRepository() {
+    abstract suspend fun login(username: String, password: String): Resource<LoginResponse>
+    abstract suspend fun register(username: String, password: String): Resource<StringResponse>
+    abstract suspend fun getDevices(): Resource<List<Device>>
+    abstract suspend fun addDevice(device: Device): Resource<Boolean>
+    abstract suspend fun deleteDevice(device: Device): Resource<Boolean>
+    abstract suspend fun updateDevice(device: Device): Resource<Boolean>
 }

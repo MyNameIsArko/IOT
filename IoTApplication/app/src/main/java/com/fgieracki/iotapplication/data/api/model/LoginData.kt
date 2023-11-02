@@ -1,6 +1,8 @@
 package com.fgieracki.iotapplication.data.api.model
 
+import com.google.gson.annotations.SerializedName
+
 data class LoginData(
-    val userName: String,
-    val password: String
+    @SerializedName("userName") val userName: String,
+    @SerializedName("password") val password: String
 )
