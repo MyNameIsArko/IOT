@@ -2,9 +2,8 @@ import dht
 import machine
 
 class DHT22:
-    def __init__(self, hardware_pin):
-        self.sensor = dht.DHT22(machine.Pin(hardware_pin))
-        self.sensor.measure()
+    def __init__(self):
+        self.sensor = dht.DHT22(33)
         print(f'Sensor initialized.\n{self.get_measurement()}')
     
     def get_measurement(self):
