@@ -40,7 +40,7 @@ fun ScreenHome(viewModel: HomeViewModel = androidx.lifecycle.viewmodel.compose.v
         }
     }
 
-    val devices = viewModel.devicesFlow.collectAsState(initial = emptyList())
+    val devices = viewModel.devicesState.collectAsState(initial = emptyList())
     Scaffold(
         topBar = {
             IoTAppBar(title = "IoT Application", onLogout = onLogout)
