@@ -1,16 +1,14 @@
-﻿namespace HttpServer.Listeners;
-
-using Configuration;
-using Repositories;
-using Data.Models;
+﻿using HttpServer.Configuration;
+using HttpServer.Data.Models;
+using HttpServer.Repositories;
 using MQTTnet;
 using MQTTnet.Client;
+
+namespace HttpServer.Listeners;
 
 public class Listener
 {
     private readonly ITopicDataRepository _topicDataRepository;
-
-    private readonly IDeviceRepository _deviceRepository;
 
     private readonly IServiceScope _serviceScope;
     
@@ -26,7 +24,6 @@ public class Listener
     {
         _serviceScope = serviceScope;
         _topicDataRepository = serviceScope.ServiceProvider.GetRequiredService<ITopicDataRepository>();
-        _deviceRepository = serviceScope.ServiceProvider.GetRequiredService<IDeviceRepository>();
         _mqttOptions = AppConfiguration.GetMqttOptions();
         _device = device;
 
@@ -75,10 +72,11 @@ public class Listener
     {
         try
         {
-            Console.WriteLine($"Trying to connect client for device {_device.Mac} to server");
+            Console.WriteLine($"Trying to connect client for device {_device.Mac} to server {_mqttOptions.IpAddress} on port {_mqttOptions.Port}");
             
             var mqttClientOptions = new MqttClientOptionsBuilder()
                 .WithClientId($"C#Client-{_device.Mac}")
+                .WithCredentials("devicePublisher", "RVbySf#FV8*!xG4&o4j6")
                 .WithTcpServer(_mqttOptions.IpAddress, _mqttOptions.Port)
                 .WithCleanSession()
                 .WithRequestProblemInformation(false)
@@ -89,9 +87,9 @@ public class Listener
             
             Console.WriteLine($"Client for device {_device.Mac} connected to server");
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            Console.WriteLine($"Client for device {_device.Mac} could not be connected");
+            Console.WriteLine($"Client for device {_device.Mac} could not be connected. Error message: {e.Message}");
             return;
         }
 

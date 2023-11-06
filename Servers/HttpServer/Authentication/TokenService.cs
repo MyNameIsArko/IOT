@@ -1,10 +1,10 @@
-namespace HttpServer.Authentication;
-
-using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
-using Configuration;
+using HttpServer.Configuration;
+using Microsoft.IdentityModel.Tokens;
+
+namespace HttpServer.Authentication;
 
 public class TokenService : ITokenService
 {

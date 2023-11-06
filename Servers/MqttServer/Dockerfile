@@ -1,20 +1,18 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+﻿FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build-env
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
+EXPOSE 1883
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
-WORKDIR /src
-COPY ["MqttServer/MqttServer.csproj", "MqttServer/"]
-RUN dotnet restore "MqttServer/MqttServer.csproj"
-COPY . .
-WORKDIR "/src/MqttServer"
-RUN dotnet build "MqttServer.csproj" -c Release -o /app/build
-
-FROM build AS publish
-RUN dotnet publish "MqttServer.csproj" -c Release -o /app/publish /p:UseAppHost=false
-
-FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+
+COPY . ./
+RUN dotnet restore MqttServer/MqttServer.csproj
+
+COPY . ./ 
+RUN dotnet publish -c Release -o out
+ 
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS final-env
+WORKDIR /app
+COPY --from=build-env /app/out .
 ENTRYPOINT ["dotnet", "MqttServer.dll"]

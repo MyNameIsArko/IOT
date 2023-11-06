@@ -1,6 +1,6 @@
 namespace HttpServer.Configuration;
 
-public class DatabaseOptions
+public class ConnectionStrings
 {
     public string ServerConnectionString { get; set; }
     

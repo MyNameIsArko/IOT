@@ -1,6 +1,6 @@
-namespace HttpServer.Listeners;
+using HttpServer.Data.Models;
 
-using Data.Models;
+namespace HttpServer.Listeners;
 
 public interface IListenersManager
 {

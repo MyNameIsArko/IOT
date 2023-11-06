@@ -1,23 +1,20 @@
-﻿namespace HttpServer.Listeners;
+﻿using HttpServer.Data.Models;
+using HttpServer.Repositories;
 
-using Repositories;
-using Data.Models;
+namespace HttpServer.Listeners;
 
 public class ListenersManager : IListenersManager
 {
-    private readonly ITopicDataRepository _topicDataRepository;
-
     private readonly IDeviceRepository _deviceRepository;
+    
+    private readonly IListenerFactory _listenerFactory;
 
     private static readonly List<Listener> Listeners = new();
 
-    private readonly IServiceProvider _serviceProvider;
-
-    public ListenersManager(ITopicDataRepository topicDataRepository, IDeviceRepository deviceRepository, IServiceProvider serviceProvider)
+    public ListenersManager(IDeviceRepository deviceRepository, IListenerFactory listenerFactory)
     {
-        _topicDataRepository = topicDataRepository;
         _deviceRepository = deviceRepository;
-        _serviceProvider = serviceProvider;
+        _listenerFactory = listenerFactory;
     }
 
     public async Task ConnectDevices()
@@ -51,7 +48,7 @@ public class ListenersManager : IListenersManager
     {
         try
         {
-            var listener = new Listener(_serviceProvider.CreateScope(), device);
+            var listener = _listenerFactory.GetListener(device);
             listener.StartListening();
             Listeners.Add(listener);
 

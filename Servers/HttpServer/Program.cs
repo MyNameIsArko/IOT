@@ -19,9 +19,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<ServerDbContext>(options =>
-    options.UseNpgsql(AppConfiguration.GetDatabaseOptions().ServerConnectionString));
+    options.UseNpgsql(AppConfiguration.GetConnectionStrings().ServerConnectionString));
 builder.Services.AddDbContext<AuthDbContext>(options =>
-    options.UseNpgsql(AppConfiguration.GetDatabaseOptions().AuthConnectionString));
+    options.UseNpgsql(AppConfiguration.GetConnectionStrings().AuthConnectionString));
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<AuthDbContext>();
@@ -35,6 +35,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     };
 });
 
+builder.Services.AddSingleton<IListenerFactory, ListenerFactory>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
 builder.Services.AddScoped<ITopicDataRepository, TopicDataRepository>();
@@ -74,6 +75,12 @@ app.UseAuthorization();
 
 using (var serviceScope = app.Services.CreateScope())
 {
+    var authDb = serviceScope.ServiceProvider.GetRequiredService<AuthDbContext>();
+    var serverDb = serviceScope.ServiceProvider.GetRequiredService<ServerDbContext>();
+
+    await authDb.Database.EnsureCreatedAsync();
+    await serverDb.Database.EnsureCreatedAsync();
+    
     var listenersManager = serviceScope.ServiceProvider.GetRequiredService<IListenersManager>();
     await listenersManager.ConnectDevices();
 }

@@ -1,9 +1,9 @@
-namespace HttpServer.Controllers;
-
-using Communication.Requests;
+using HttpServer.Authentication;
+using HttpServer.Communication.Requests;
 using Microsoft.AspNetCore.Identity;
-using Authentication;
 using Microsoft.AspNetCore.Mvc;
+
+namespace HttpServer.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
