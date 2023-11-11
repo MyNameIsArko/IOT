@@ -25,7 +25,6 @@ class DefaultRepository : Repository() {
     }
 
     override suspend fun login(username: String, password: String): Resource<LoginResponse> {
-
         return safeApiCall{ api.login(LoginData(username, password)) }
     }
 
