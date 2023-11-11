@@ -43,7 +43,9 @@ fun ScreenAddDevice(
 
     LaunchedEffect(Unit) {
         viewModel.navChannel.collectLatest {
-            onBackClick()
+            if(it == "deviceList"){
+                onBackClick()
+            }
         }
     }
 

@@ -11,6 +11,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 object IoTWebService {
     private const val SERVER_URL = "http://test.com"
@@ -59,7 +60,7 @@ object IoTWebService {
     }
 
     interface DeviceApi {
-//        @GET("api/Device/list")
-//        suspend fun getDevices(@Header("Authorization") token: String): Response<List<Device>>
+        @POST("/")
+        suspend fun addDevice(@Query("ssid") ssid: String, @Query("password") password: String, @Query("jwt") jwt: String): Response<String>
     }
 }

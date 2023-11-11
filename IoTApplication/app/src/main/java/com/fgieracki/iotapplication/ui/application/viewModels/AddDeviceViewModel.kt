@@ -12,13 +12,17 @@ import android.net.wifi.WifiManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.fgieracki.iotapplication.data.DefaultRepository
+import com.fgieracki.iotapplication.data.Repository
 import com.fgieracki.iotapplication.data.local.ActivityCatcher
 import com.fgieracki.iotapplication.data.local.ContextCatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
 @SuppressLint("MissingPermission")
-class AddDeviceViewModel() : ViewModel() {
+class AddDeviceViewModel(private val repository: Repository = DefaultRepository()) : ViewModel() {
     val ssid: MutableStateFlow<String> = MutableStateFlow("")
     val password: MutableStateFlow<String> = MutableStateFlow("")
 
@@ -134,6 +138,16 @@ class AddDeviceViewModel() : ViewModel() {
 
     fun connectDevice() {
         toastChannel.tryEmit("Connecting to device...")
+
+        viewModelScope.launch() {
+            val resource = repository.addDevice(ssid.value, password.value)
+            if (resource.data != null) {
+                navChannel.emit("deviceList")
+            } else {
+                toastChannel.tryEmit("Failed to connect to device. Try again!")
+            }
+        }
+
     }
 
 }
