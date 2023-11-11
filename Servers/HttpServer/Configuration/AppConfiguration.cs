@@ -13,9 +13,9 @@ public static class AppConfiguration
         return Get<JwtOptions>("Jwt");
     }
     
-    public static DatabaseOptions GetDatabaseOptions()
+    public static ConnectionStrings GetConnectionStrings()
     {
-        return Get<DatabaseOptions>("DatabaseOptions");
+        return Get<ConnectionStrings>("ConnectionStrings");
     }
     
     public static MqttOptions GetMqttOptions()

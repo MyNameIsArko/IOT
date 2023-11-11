@@ -1,9 +1,9 @@
-namespace HttpServer.Data.DbContext;
-
-using Models;
+using HttpServer.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
-public class ServerDbContext : DbContext
+namespace HttpServer.Data.DbContext;
+
+public class ServerDbContext : Microsoft.EntityFrameworkCore.DbContext
 {
     public ServerDbContext()
     {

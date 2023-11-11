@@ -1,11 +1,6 @@
-namespace MqttServer;
-
-using System.Net;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using MQTTnet.AspNetCore;
+
+namespace MqttServer;
 
 public static class Program
 {
@@ -18,10 +13,8 @@ public static class Program
                     webBuilder.UseKestrel(
                         o =>
                         {
-                            // This will allow MQTT connections based on TCP port 1883.
-                            var adress = "192.168.1.18";
-                            IPAddress.TryParse(adress, out var ipAddress);
-                            o.Listen(ipAddress!, 1883, l => l.UseMqtt());
+                            // This will allow MQTT connections based on TCP port 1883.;
+                            o.ListenAnyIP(1883, l => l.UseMqtt());
                         });
 
                     webBuilder.UseStartup<Startup>();
@@ -39,6 +32,7 @@ public static class Program
             app.UseMqttServer(
                 server =>
                 {
+                    
                     server.ValidatingConnectionAsync += mqttController.ValidateConnection;
                     server.ClientConnectedAsync += mqttController.OnClientConnected;
                     server.ClientDisconnectedAsync += mqttController.OnClientDisconnected;

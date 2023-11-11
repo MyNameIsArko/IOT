@@ -25,7 +25,14 @@ public class MqttController
 
     public Task ValidateConnection(ValidatingConnectionEventArgs eventArgs)
     {
-        Console.WriteLine($"Client '{eventArgs.ClientId}' wants to connect. Accepting!");
-        return Task.CompletedTask;
+        Console.WriteLine($"Client '{eventArgs.ClientId}' wants to connect");
+
+        if (eventArgs.UserName == "devicePublisher" && eventArgs.Password == "RVbySf#FV8*!xG4&o4j6")
+        {
+            return Task.CompletedTask;
+        }
+
+        eventArgs.ReasonCode = MQTTnet.Protocol.MqttConnectReasonCode.NotAuthorized;
+        return Task.FromException(new Exception("User not authorized"));
     }
 }

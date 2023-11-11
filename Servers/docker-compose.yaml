@@ -1,0 +1,24 @@
+version: '3.9'
+
+networks:
+  dev:
+    driver: bridge
+
+services:  
+  httpserver:
+    build:
+      context: .
+      dockerfile: ./HttpServer/Dockerfile
+    container_name: httpserver-container
+    networks:
+      - dev
+
+  mqttserver:
+    build:
+      context: .
+      dockerfile: ./MqttServer/Dockerfile
+    container_name: mqttserver-container
+    ports:
+      - '1883:1883'
+    networks:
+      - dev

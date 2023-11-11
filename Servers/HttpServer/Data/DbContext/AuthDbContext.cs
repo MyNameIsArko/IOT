@@ -1,10 +1,8 @@
-namespace HttpServer.Data.DbContext;
-
-using Configuration;
+using HttpServer.Configuration;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 
+namespace HttpServer.Data.DbContext;
 
 public class AuthDbContext : IdentityDbContext
 {
@@ -20,27 +18,7 @@ public class AuthDbContext : IdentityDbContext
     {
         if (!optionsBuilder.IsConfigured)
         {
-            optionsBuilder.UseNpgsql(AppConfiguration.GetDatabaseOptions().AuthConnectionString);
+            optionsBuilder.UseNpgsql(AppConfiguration.GetConnectionStrings().AuthConnectionString);
         }
-    }
-    
-    protected override void OnModelCreating(ModelBuilder builder)
-    {
-        base.OnModelCreating(builder);
-        
-        var userRoleId = "06c7e0c3-cecf-4429-afc9-593a27a6ff7f";
-    
-        var roles = new List<IdentityRole>
-        {
-            new IdentityRole
-            {
-                Name = "User",
-                NormalizedName = "User",
-                Id = userRoleId,
-                ConcurrencyStamp = userRoleId
-            },
-        };
-    
-        builder.Entity<IdentityRole>().HasData(roles);
     }
 }

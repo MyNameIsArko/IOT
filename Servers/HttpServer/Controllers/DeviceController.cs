@@ -1,17 +1,17 @@
-namespace HttpServer.Controllers;
-
+using HttpServer.Authentication;
+using HttpServer.Communication.Requests;
+using HttpServer.Communication.Responses;
+using HttpServer.Data.Models;
+using HttpServer.Listeners;
+using HttpServer.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Communication.Requests;
-using Communication.Responses;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.EntityFrameworkCore;
-using Listeners;
-using Data.Models;
-using Microsoft.AspNetCore.Mvc;
-using Repositories;
-using Authentication;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+
+namespace HttpServer.Controllers;
 
 [ApiController]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
