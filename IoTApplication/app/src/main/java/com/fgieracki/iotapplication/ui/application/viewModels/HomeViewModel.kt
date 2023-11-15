@@ -1,6 +1,7 @@
 package com.fgieracki.iotapplication.ui.application.viewModels
 
 import android.os.Handler
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fgieracki.iotapplication.data.DefaultRepository
@@ -27,12 +28,29 @@ class HomeViewModel(private val repository: Repository = DefaultRepository()) : 
         }
     }
 
+    init {
+        updateDevicesState()
+//        mainHandler = Handler()
+//        mainHandler.post(updateDataTask)
+    }
+
+    fun addHandler() {
+        mainHandler = Handler()
+        mainHandler.post(updateDataTask)
+    }
+
+    fun removeHandler() {
+        mainHandler.removeCallbacks(updateDataTask)
+    }
+
     fun updateDevicesState() {
         viewModelScope.launch {
             val resourceFlow = repository.getDevices()
+            Log.d("HomeViewModel", "updateDevicesState")
             val resource = resourceFlow.collect {
                 if(it is Resource.Error) {
                     if(it.code == 401) {
+                        mainHandler.removeCallbacks(updateDataTask)
                         navChannel.emit("logout")
                     }
                     else {
