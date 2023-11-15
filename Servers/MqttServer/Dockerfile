@@ -7,7 +7,7 @@ EXPOSE 1883
 WORKDIR /app
 
 COPY . ./
-RUN dotnet restore MqttServer/MqttServer.csproj
+RUN dotnet restore MqttServer.csproj
 
 COPY . ./ 
 RUN dotnet publish -c Release -o out

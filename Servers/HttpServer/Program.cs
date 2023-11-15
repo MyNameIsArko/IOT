@@ -39,6 +39,7 @@ builder.Services.AddSingleton<IListenerFactory, ListenerFactory>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
 builder.Services.AddScoped<ITopicDataRepository, TopicDataRepository>();
+builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 builder.Services.AddScoped<IListenersManager, ListenersManager>();
 
 var signingKey = Encoding.UTF8.GetBytes(AppConfiguration.GetJwtOptions().EncryptionKey);

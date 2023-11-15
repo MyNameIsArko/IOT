@@ -24,28 +24,40 @@ public class DeviceController : Controller
     
     private readonly ITopicDataRepository _topicDataRepository;
     
+    private readonly ITokenRepository _tokenRepository;
+
     private readonly IListenersManager _listenersManager;
     
     private readonly ITokenService _tokenService;
 
     public DeviceController(UserManager<IdentityUser> userManager, IDeviceRepository deviceRepository,
-        ITopicDataRepository topicDataRepository, ITokenService tokenService, IListenersManager listenersManager)
+        ITopicDataRepository topicDataRepository, ITokenRepository tokenRepository, ITokenService tokenService, IListenersManager listenersManager)
     {
         _userManager = userManager;
         _deviceRepository = deviceRepository;
         _topicDataRepository = topicDataRepository;
+        _tokenRepository = tokenRepository;
         _tokenService = tokenService;
         _listenersManager = listenersManager;
     }
     
+    [AllowAnonymous]
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDeviceRequest request)
     {
-        var user = await GetUserFromToken(HttpContext.Request.Headers);
-        if (user is null)
+        if (!HttpContext.Request.Headers.TryGetValue("Authorization", out var authHeader) || !authHeader.ToString().StartsWith("Bearer "))
         {
-            return Unauthorized("User does not exist");
+            return Unauthorized("No token provided");
         }
+
+        var token = authHeader.ToString()["Bearer ".Length..].Trim();
+
+        if (!await _tokenRepository.DoesTokenExist(token, request.UserId))
+        {
+            return Unauthorized("Unknown token");
+        }
+
+        await _tokenRepository.RemoveToken(token);
 
         if (await _deviceRepository.GetDevice(request.Mac) is { } deviceEntity)
         {
@@ -59,7 +71,7 @@ public class DeviceController : Controller
         var device = new Device
         {
             Mac = request.Mac.ToUpper(),
-            UserId = user.Id,
+            UserId = request.UserId,
             RegistrationDate = DateTime.Now
         };
 
@@ -167,6 +179,30 @@ public class DeviceController : Controller
         return Ok(response);
     }
 
+    [HttpPost("token")]
+    public async Task<ActionResult<string>> AddToken([FromBody] AddTokenRequest request)
+    {
+        var user = await GetUserFromToken(HttpContext.Request.Headers);
+        if (user is null)
+        {
+            return Unauthorized();
+        }
+
+        var token = new Token
+        {
+            Value = request.Value,
+            UserId = user.Id
+        };
+
+        var result = await _tokenRepository.AddToken(token);
+        if (result)
+        {
+            return Ok(user.Id);
+        }
+        
+        return BadRequest("Token could not be added");
+    }
+
     private async Task<IdentityUser?> GetUserFromToken(IHeaderDictionary headers)
     {
         if (!headers.TryGetValue("Authorization", out var authHeader) || !authHeader.ToString().StartsWith("Bearer "))
@@ -190,13 +226,6 @@ public class DeviceController : Controller
             return false;
         }
         
-        var deviceRemoved = await _deviceRepository.RemoveDevice(device);
-        if (!deviceRemoved)
-        {
-            _listenersManager.AddListenerToDevice(device);
-            return false;
-        }
-
-        return true;
+        return await _deviceRepository.RemoveDevice(device);
     }
 }

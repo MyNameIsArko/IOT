@@ -72,7 +72,7 @@ public class Listener
     {
         try
         {
-            Console.WriteLine($"Trying to connect client for device {_device.Mac} to server {_mqttOptions.IpAddress} on port {_mqttOptions.Port}");
+            Console.WriteLine($"Trying to connect client for device {_device.Mac} to server");
             
             var mqttClientOptions = new MqttClientOptionsBuilder()
                 .WithClientId($"C#Client-{_device.Mac}")

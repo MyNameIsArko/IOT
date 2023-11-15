@@ -2,11 +2,11 @@ version: '3.9'
 
 services:
   httpserver:
-    image: docker.io/library/httpserver
+    image: httpserver
     depends_on: 
       - serverdb
       - authdb
-    container_name: httpserver-container
+    container_name: httpserver
     ports:
       - '80:5000'
     build:

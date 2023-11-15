@@ -18,4 +18,6 @@ public class ServerDbContext : Microsoft.EntityFrameworkCore.DbContext
     public DbSet<Device> Devices { get; set; }
     
     public DbSet<TopicData> TopicDatas { get; set; }
+    
+    public DbSet<Token> Tokens { get; set; }
 }
