@@ -18,7 +18,8 @@ import com.fgieracki.iotapplication.ui.theme.IoTBlue
 fun AddDeviceAppBar(
     title: String = "Add device",
     onRefresh : () -> Unit = {},
-    onBack : () -> Unit = {}
+    onBack : () -> Unit = {},
+    hideRefresh: Boolean = false
 ) {
     CenterAlignedTopAppBar(
         title = {
@@ -30,12 +31,13 @@ fun AddDeviceAppBar(
             )
                 },
         actions = {
-            IconButton(onClick = { onRefresh() }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_refresh_24),
-                    contentDescription = "Refresh"
-                )
-            }
+            if(!hideRefresh)
+                IconButton(onClick = { onRefresh() }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_refresh_24),
+                        contentDescription = "Refresh"
+                    )
+                }
         },
         navigationIcon = {
             IconButton(onClick = { onBack() }) {

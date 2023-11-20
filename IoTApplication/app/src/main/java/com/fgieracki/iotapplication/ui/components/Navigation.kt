@@ -8,9 +8,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.fgieracki.iotapplication.ui.application.screens.ScreenAddDevice
-import com.fgieracki.iotapplication.ui.application.screens.ScreenAddDeviceTutorial
 import com.fgieracki.iotapplication.ui.application.screens.ScreenHome
 import com.fgieracki.iotapplication.ui.application.screens.ScreenLogin
+import com.fgieracki.iotapplication.ui.application.screens.ScreenPairWithDevice
 import com.fgieracki.iotapplication.ui.application.viewModels.NavbarViewModel
 import kotlinx.coroutines.flow.collectLatest
 
@@ -58,15 +58,14 @@ fun Navigation(viewModel : NavbarViewModel = androidx.lifecycle.viewmodel.compos
         }
     }
 
-    fun navigateToAddDeviceTutorial() {
-        navController.navigate("addDeviceTutorial") {
+    fun navigateToPairWithDevice() {
+        navController.navigate("pairWithDevice") {
             launchSingleTop = true
-            popUpTo("home") {
+            popUpTo("addDevice") {
                 inclusive = false
             }
         }
     }
-
 
     NavHost(navController = navController, startDestination = "login" ) {
         composable("login") {
@@ -75,13 +74,15 @@ fun Navigation(viewModel : NavbarViewModel = androidx.lifecycle.viewmodel.compos
 
         composable("home") {
             ScreenHome( onLogout = { logout() },
-                        onAddDevice = {navigateToAddDeviceTutorial()}
+                        onAddDevice = {navigateToPairWithDevice()}
             )
         }
 
-        composable("addDeviceTutorial") {
-            ScreenAddDeviceTutorial( onNextClick = { navigateToAddDevice() },
-                onBackClick = { navigateBack() })
+
+        composable("pairWithDevice") {
+            ScreenPairWithDevice( onBackClick = { navigateBack() },
+                                  onAddDevice = { navigateToAddDevice() }
+            )
         }
 
         composable("addDevice") {
