@@ -9,8 +9,9 @@ class Broker:
         self.client_id = ubinascii.hexlify(machine.unique_id())
         self.mqtt_ip = 'TO GET'
 
-        self.temperature_topic = f'{mac}/temperature'
-        self.humidity_topic = f'{mac}/humidity'
+        mac = mac.upper()
+        self.temperature_topic = f'{mac}/Temperature'
+        self.humidity_topic = f'{mac}/Humidity'
         self.sensor = sensor
 
         try:

@@ -2,7 +2,6 @@ import network
 import ujson
 import usocket
 import os
-import password_generator
 import time
 import picoweb
 from picoweb.utils import parse_qs
