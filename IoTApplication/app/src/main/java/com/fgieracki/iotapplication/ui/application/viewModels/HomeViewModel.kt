@@ -1,6 +1,7 @@
 package com.fgieracki.iotapplication.ui.application.viewModels
 
 import android.os.Handler
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fgieracki.iotapplication.data.DefaultRepository
@@ -12,7 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 class HomeViewModel(private val repository: Repository = DefaultRepository()) : ViewModel() {
-    var devicesFlow: MutableStateFlow<List<Device>> = MutableStateFlow(emptyList())
+    var devicesState: MutableStateFlow<List<Device>> = MutableStateFlow(emptyList())
 
 
     val navChannel = MutableSharedFlow<String>(extraBufferCapacity = 1)
@@ -27,17 +28,40 @@ class HomeViewModel(private val repository: Repository = DefaultRepository()) : 
         }
     }
 
+    init {
+        updateDevicesState()
+//        mainHandler = Handler()
+//        mainHandler.post(updateDataTask)
+    }
+
+    fun addHandler() {
+        mainHandler = Handler()
+        mainHandler.post(updateDataTask)
+    }
+
+    fun removeHandler() {
+        mainHandler.removeCallbacks(updateDataTask)
+    }
+
     fun updateDevicesState() {
-        viewModelScope.launch() {
-            val resource = repository.getDevices()
-            if(resource is Resource.Success) {
-                devicesFlow.value = resource.data!!
+        viewModelScope.launch {
+            val resourceFlow = repository.getDevices()
+            Log.d("HomeViewModel", "updateDevicesState")
+            val resource = resourceFlow.collect {
+                if(it is Resource.Error) {
+                    if(it.code == 401) {
+                        mainHandler.removeCallbacks(updateDataTask)
+                        navChannel.emit("logout")
+                    }
+                    else {
+                        _toastChannel.emit("Error ${it.code}: ${it.message}")
+                    }
+                } else {
+                    devicesState.value = it.data!!
+                    _toastChannel.emit("Devices data updated")
+                }
             }
-            else if (resource.code == 401) {
-                println("Unauthorized")
-                _toastChannel.tryEmit("Session expired")
-                navChannel.tryEmit("logout")
-            }
+
         }
     }
 

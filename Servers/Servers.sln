@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpServer", "HttpServer\HttpServer.csproj", "{A6950F13-5F42-47DA-9006-82F1ED697051}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MqttServer", "MqttServer\MqttServer.csproj", "{14E7DF40-724B-4FE4-82C8-F89624CD3989}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MqttPublisher", "MqttPublisher\MqttPublisher.csproj", "{08DB7775-8D8C-459A-BD70-2E8C3FA6CB4C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A6950F13-5F42-47DA-9006-82F1ED697051}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6950F13-5F42-47DA-9006-82F1ED697051}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6950F13-5F42-47DA-9006-82F1ED697051}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6950F13-5F42-47DA-9006-82F1ED697051}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14E7DF40-724B-4FE4-82C8-F89624CD3989}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14E7DF40-724B-4FE4-82C8-F89624CD3989}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14E7DF40-724B-4FE4-82C8-F89624CD3989}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14E7DF40-724B-4FE4-82C8-F89624CD3989}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08DB7775-8D8C-459A-BD70-2E8C3FA6CB4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08DB7775-8D8C-459A-BD70-2E8C3FA6CB4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08DB7775-8D8C-459A-BD70-2E8C3FA6CB4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08DB7775-8D8C-459A-BD70-2E8C3FA6CB4C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

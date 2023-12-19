@@ -12,15 +12,21 @@ import android.net.wifi.WifiManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.fgieracki.iotapplication.data.DefaultRepository
+import com.fgieracki.iotapplication.data.Repository
 import com.fgieracki.iotapplication.data.local.ActivityCatcher
 import com.fgieracki.iotapplication.data.local.ContextCatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
 @SuppressLint("MissingPermission")
-class AddDeviceViewModel() : ViewModel() {
+class AddDeviceViewModel(private val repository: Repository = DefaultRepository()) : ViewModel() {
     val ssid: MutableStateFlow<String> = MutableStateFlow("")
     val password: MutableStateFlow<String> = MutableStateFlow("")
+
+//    val appWiFiManager: AppWiFiManager = AppWiFiManager()
 
     val navChannel = MutableSharedFlow<String>(extraBufferCapacity = 1)
 
@@ -48,11 +54,34 @@ class AddDeviceViewModel() : ViewModel() {
     }
 
     init {
+//        checkIfLocationIsEnabled()
+        requestAllPermissions()
         checkIfLocationIsEnabled()
         val intentFilter = IntentFilter()
         intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
         ContextCatcher.getContext().registerReceiver(wifiScanReceiver, intentFilter)
         updateWifiNetworkList()
+    }
+
+    private fun requestAllPermissions() {
+        ActivityCompat.requestPermissions(
+            ActivityCatcher.getActivity(),
+            arrayOf(
+                Manifest.permission.INTERNET,
+
+                Manifest.permission.ACCESS_NETWORK_STATE,
+                Manifest.permission.CHANGE_NETWORK_STATE,
+
+                Manifest.permission.ACCESS_WIFI_STATE,
+                Manifest.permission.CHANGE_WIFI_STATE,
+
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+            ),
+            1
+        )
+
+
     }
 
     private fun checkIfLocationIsEnabled() {
@@ -89,7 +118,7 @@ class AddDeviceViewModel() : ViewModel() {
                 1
             )
         }
-        Log.d("AddDeviceViewModel", "permission not granted")
+        Log.d("AddDeviceViewModel", "permission not granted FINE LOCATION")
 
         sendToastIfWifiDisabled()
 
@@ -134,6 +163,21 @@ class AddDeviceViewModel() : ViewModel() {
 
     fun connectDevice() {
         toastChannel.tryEmit("Connecting to device...")
+        Log.d("AddDeviceViewModel", "ssid: ${ssid.value}, password: ${password.value}")
+//        appWiFiManager.disconnectFromUserNetwork(ContextCatcher.getContext())
+//        appWiFiManager.connectToUserNetwork(ContextCatcher.getContext(), ssid.value, password.value)
+//
+//            appWiFiManager.disconnectFromUserNetwork(ContextCatcher.getContext())
+
+        viewModelScope.launch() {
+            val resource = repository.addDevice(ssid.value, password.value)
+            if (resource.data != null) {
+                navChannel.emit("deviceList")
+            } else {
+                toastChannel.tryEmit("Failed to connect to device. Try again!")
+            }
+        }
+
     }
 
 }

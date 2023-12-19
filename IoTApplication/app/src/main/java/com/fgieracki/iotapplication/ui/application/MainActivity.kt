@@ -17,6 +17,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         ContextCatcher.setContext(applicationContext)
         ActivityCatcher.setActivity(this)
+
         setContent {
             IoTApplicationTheme {
                 // A surface container using the 'background' color from the theme

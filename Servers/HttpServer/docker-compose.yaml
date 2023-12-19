@@ -1,0 +1,56 @@
+version: '3.9'
+
+services:
+  httpserver:
+    image: httpserver
+    depends_on: 
+      - serverdb
+      - authdb
+    container_name: httpserver
+    ports:
+      - '80:5000'
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - 'ASPNETCORE_URLS=Development'
+    networks:
+      - dev
+
+  serverdb:
+    image: postgres:latest
+    container_name: serverdb
+    environment:
+      - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=postgres'
+      - 'POSTGRES_DB=ServerDb'
+    ports:
+      - '5433:5432'
+    restart: always
+    volumes:
+      - app_data_server:/var/lib/postgresql/data
+    networks:
+      - dev
+        
+  authdb:
+    image: postgres:latest
+    container_name: authdb
+    environment:
+      - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=postgres'
+      - 'POSTGRES_DB=AuthDb'
+    ports:
+      - '5434:5432'
+    restart: always
+    volumes:
+      - app_data_auth:/var/lib/postgresql/data
+    networks:
+      - dev
+  
+networks:
+  dev:
+    
+volumes:
+  app_data_server: 
+  app_data_auth:
+    
