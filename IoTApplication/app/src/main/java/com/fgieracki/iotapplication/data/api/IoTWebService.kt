@@ -14,19 +14,7 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 
 object IoTWebService {
-    private const val SERVER_URL = "http://srv3.enteam.pl:180/"
-//    private const val DEVICE_URL = "http://192.168.4.1"
-
-//    val deviceApi: DeviceApi by lazy {
-//        deviceRetrofit.create(DeviceApi::class.java)
-//    }
-
-//    private val deviceRetrofit: Retrofit by lazy {
-//        Retrofit.Builder()
-//            .baseUrl(DEVICE_URL)
-//            .addConverterFactory(GsonConverterFactory.create())
-//            .build()
-//    }
+    private const val SERVER_URL = "https://srv3.enteam.pl:180/"
 
     val api: IoTApi by lazy {
         retrofit.create(IoTApi::class.java)
@@ -54,10 +42,4 @@ object IoTWebService {
                                   @Body tokenData: TokenData): Response<StringResponse>
 
     }
-//
-//    interface DeviceApi {
-//        @POST("/")
-//        suspend fun addDevice(@Query("ssid") ssid: String, @Query("password") password: String,
-//                              @Query("jwt") jwt: String): Response<String>
-//    }
 }

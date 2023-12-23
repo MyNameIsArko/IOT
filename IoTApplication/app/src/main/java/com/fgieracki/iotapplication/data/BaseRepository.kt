@@ -11,7 +11,10 @@ abstract class BaseRepository {
     suspend fun <T> safeApiCall(apiToBeCalled: suspend () -> Response<T>): Resource<T> {
         return withContext(Dispatchers.IO) {
             try {
+                println("API CALL: 1")
+
                 val response: Response<T> = apiToBeCalled()
+                println("API CALL: 2")
 
 
                 if (response.isSuccessful) {
