@@ -3,7 +3,7 @@ package com.fgieracki.iotapplication.ui.components
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.fgieracki.iotapplication.data.model.Device
+import com.fgieracki.iotapplication.domain.model.Device
 
 @Composable
 fun DeviceList(devices: List<Device>, modifier: Modifier = Modifier, deleteDevice: (Device) -> Unit = {}) {

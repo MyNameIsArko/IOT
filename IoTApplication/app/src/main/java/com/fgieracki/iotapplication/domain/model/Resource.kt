@@ -1,4 +1,4 @@
-package com.fgieracki.iotapplication.data.model
+package com.fgieracki.iotapplication.domain.model
 
 sealed class Resource<T>(
     val data: T? = null,

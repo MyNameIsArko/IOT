@@ -1,4 +1,4 @@
-package com.fgieracki.iotapplication.ui.application
+package com.fgieracki.iotapplication
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -9,7 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.fgieracki.iotapplication.data.local.ActivityCatcher
 import com.fgieracki.iotapplication.data.local.ContextCatcher
-import com.fgieracki.iotapplication.ui.components.Navigation
+import com.fgieracki.iotapplication.ui.Navigation
 import com.fgieracki.iotapplication.ui.theme.IoTApplicationTheme
 
 class MainActivity : ComponentActivity() {
@@ -17,6 +17,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         ContextCatcher.setContext(applicationContext)
         ActivityCatcher.setActivity(this)
+//        val manager = ContextCatcher.getContext()
+//            .getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+//        BluetoothAdapterCatcher.setAdapter(manager.adapter)
 
         setContent {
             IoTApplicationTheme {

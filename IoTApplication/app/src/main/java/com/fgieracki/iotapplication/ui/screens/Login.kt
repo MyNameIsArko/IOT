@@ -1,4 +1,4 @@
-package com.fgieracki.iotapplication.ui.application.screens
+package com.fgieracki.iotapplication.ui.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.fgieracki.iotapplication.ui.application.viewModels.SignInViewModel
+import com.fgieracki.iotapplication.di.viewModels.SignInViewModel
 import com.fgieracki.iotapplication.ui.components.LoginButtonGroup
 import com.fgieracki.iotapplication.ui.components.LoginForm
 import kotlinx.coroutines.flow.collectLatest

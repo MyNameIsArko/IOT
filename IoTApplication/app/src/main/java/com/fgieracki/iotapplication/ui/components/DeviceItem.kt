@@ -12,7 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.painterResource
 import com.fgieracki.iotapplication.R
-import com.fgieracki.iotapplication.data.model.Device
+import com.fgieracki.iotapplication.domain.model.Device
 import com.fgieracki.iotapplication.ui.theme.IoTAmaranth
 import com.fgieracki.iotapplication.ui.theme.IoTBlue
 
@@ -22,9 +22,9 @@ fun DeviceItem(device: Device, deleteDevice: (Device) -> Unit = {}) {
     val menuExpanded = remember { mutableStateOf(false) }
 
     ListItem(
-        headlineText = { Text(text = device.mac) },
+        headlineText = { Text(text = device.name) },
         overlineText = { Text(text = "Last update: " + device.lastTemperatureUpdateTimestamp.toString()) },
-        supportingText = { Text(text = if (device.state) "Temperature: " + device.temperature + ", humidity: " + device.humidity else "OFF") },
+        supportingText = { Text(text = "Temperature: " + device.temperature + ", humidity: " + device.humidity) },
         trailingContent = {
             IconButton(
                 onClick = { menuExpanded.value = !menuExpanded.value }

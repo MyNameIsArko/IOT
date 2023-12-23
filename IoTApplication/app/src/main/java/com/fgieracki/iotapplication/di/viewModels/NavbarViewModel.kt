@@ -1,4 +1,4 @@
-package com.fgieracki.iotapplication.ui.application.viewModels
+package com.fgieracki.iotapplication.di.viewModels
 
 import android.content.Context
 import androidx.lifecycle.ViewModel

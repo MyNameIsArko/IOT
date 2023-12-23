@@ -1,4 +1,4 @@
-package com.fgieracki.iotapplication.ui.application.screens
+package com.fgieracki.iotapplication.ui.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.fgieracki.iotapplication.ui.application.viewModels.AddDeviceViewModel
+import com.fgieracki.iotapplication.di.viewModels.AddDeviceViewModel
 import com.fgieracki.iotapplication.ui.components.AddDeviceAppBar
 import com.fgieracki.iotapplication.ui.theme.IoTBlue
 import kotlinx.coroutines.flow.collectLatest

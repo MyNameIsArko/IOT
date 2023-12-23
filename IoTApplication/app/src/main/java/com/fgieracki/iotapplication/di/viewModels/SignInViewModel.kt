@@ -1,4 +1,4 @@
-package com.fgieracki.iotapplication.ui.application.viewModels
+package com.fgieracki.iotapplication.di.viewModels
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.fgieracki.iotapplication.data.DefaultRepository
 import com.fgieracki.iotapplication.data.Repository
 import com.fgieracki.iotapplication.data.local.ContextCatcher
-import com.fgieracki.iotapplication.data.model.LoginInputFields
+import com.fgieracki.iotapplication.domain.model.LoginInputFields
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,22 +55,22 @@ class SignInViewModel(private val repository: Repository = DefaultRepository()) 
 
     fun login() {
         viewModelScope.launch(Dispatchers.IO) {
-//            val resource = repository.login(inputFields.value.username, inputFields.value.password)
-//            if (resource.data != null) {
-//                val token = resource.data.token
-//                token.let {}
-//                USER_TOKEN = token
-//                val editor = sharedPreference.edit()
-//                editor.putString("USER_TOKEN", token)
-//                editor.apply()
-//
-//                clearInputs()
-//                navChannel.tryEmit("OK")
-//            }
-//
-//            else {
-//                toastChannel.emit("Login failed: " + resource.message)
-//            }
+            val resource = repository.login(inputFields.value.username, inputFields.value.password)
+            if (resource.data != null) {
+                val token = resource.data.token
+                token.let {}
+                USER_TOKEN = token
+                val editor = sharedPreference.edit()
+                editor.putString("USER_TOKEN", token)
+                editor.apply()
+
+                clearInputs()
+                navChannel.tryEmit("OK")
+            }
+
+            else {
+                toastChannel.emit("Login failed: " + resource.message)
+            }
 
             navChannel.tryEmit("OK")
         }

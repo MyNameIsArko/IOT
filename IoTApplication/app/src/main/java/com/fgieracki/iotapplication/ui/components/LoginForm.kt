@@ -26,7 +26,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fgieracki.iotapplication.R
-import com.fgieracki.iotapplication.data.model.LoginInputFields
+import com.fgieracki.iotapplication.domain.model.LoginInputFields
 import com.fgieracki.iotapplication.ui.theme.IoTBlue
 
 @OptIn(ExperimentalMaterial3Api::class)

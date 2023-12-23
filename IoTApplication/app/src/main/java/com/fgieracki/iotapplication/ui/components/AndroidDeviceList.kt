@@ -7,24 +7,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.fgieracki.iotapplication.data.model.BluetoothDevice
+import com.juul.kable.AndroidAdvertisement
 
 @Composable
-fun BluetoothDeviceList(
+fun AndroidDeviceList(
     modifier: Modifier = Modifier,
-    devices: List<BluetoothDevice>,
-    onClick: (BluetoothDevice) -> Unit = {}
+    devices: List<AndroidAdvertisement>,
+    onClick: (AndroidAdvertisement) -> Unit = {}
 ) {
     if (devices.isEmpty()) {
         Text(
-            text = "Turn ON Bluetooth to see available devies.",
+            text = "Turn ON Location and Bluetooth to see devices.",
             style = MaterialTheme.typography.bodyLarge,
             color = Color.Red
         )
     } else {
         LazyColumn {
             items(devices) { device ->
-                BluetoothDeviceItem(device = device, onClick = { onClick(device) })
+                AndroidDeviceItem(device = device, onClick = { onClick(device) })
             }
         }
     }

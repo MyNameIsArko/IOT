@@ -8,23 +8,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
 import com.fgieracki.iotapplication.R
-import com.fgieracki.iotapplication.data.model.BluetoothDevice
+import com.juul.kable.AndroidAdvertisement
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BluetoothDeviceItem(
-    device: BluetoothDevice,
-    onClick: (BluetoothDevice) -> Unit = {},
-) {
+fun AndroidDeviceItem(device: AndroidAdvertisement, onClick: (AndroidAdvertisement) -> Unit = {}) {
     ListItem(
         headlineText = { Text(text = "Name: ${device.name}") },
-        supportingText = { Text(text = "MAC: ${device.address}") },
-        leadingContent = {
-            Icon(
-                painter = painterResource(id = R.drawable.baseline_bluetooth_24),
-                contentDescription = "Wifi Icon"
-            )
-        },
+        supportingText = { Text(text = "Address: ${device.address}") },
         trailingContent = {
             IconButton(
                 onClick = { onClick(device) },
