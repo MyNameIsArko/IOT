@@ -13,5 +13,15 @@ public class DeviceResponse
     public DateTime? LastTemperatureUpdate { get; set; }
     
     public DateTime? LastHumidityUpdate { get; set; }
-    
+   
+    public override string ToString()
+    {
+        return $"DeviceResponse: " +
+               $"Mac = {Mac}, " +
+               $"Name = {Name ?? "N/A"}, " +
+               $"Temperature = {Temperature ?? "N/A"}, " +
+               $"Humidity = {Humidity ?? "N/A"}, " +
+               $"LastTemperatureUpdate = {LastTemperatureUpdate?.ToString("yyyy-MM-dd HH:mm:ss") ?? "N/A"}, " +
+               $"LastHumidityUpdate = {LastHumidityUpdate?.ToString("yyyy-MM-dd HH:mm:ss") ?? "N/A"}";
+    }
 }
