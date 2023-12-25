@@ -63,7 +63,6 @@ fun ScreenAddDevice(
                     .fillMaxSize()
                     .padding(it)
             ) {
-//                if (scanResults.value.size > 0) {
                     Text(
                         text = "Choose device Wi-Fi network from the list below.",
                         style = MaterialTheme.typography.headlineMedium,

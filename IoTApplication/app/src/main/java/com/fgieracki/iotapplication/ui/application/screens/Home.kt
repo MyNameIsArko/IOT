@@ -8,8 +8,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
 import com.fgieracki.iotapplication.ui.application.viewModels.HomeViewModel
 import com.fgieracki.iotapplication.ui.components.DeviceList
 import com.fgieracki.iotapplication.ui.components.FloatingActionButtonAdd
@@ -24,8 +27,22 @@ fun ScreenHome(viewModel: HomeViewModel = androidx.lifecycle.viewmodel.compose.v
                onAddDevice: () -> Unit = {},
 ) {
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycleState by lifecycleOwner.lifecycle.currentStateFlow.collectAsState()
+
+    LaunchedEffect(lifecycleState) {
+        when (lifecycleState) {
+            Lifecycle.State.DESTROYED -> { viewModel.removeHandler() }
+            Lifecycle.State.INITIALIZED -> { }
+            Lifecycle.State.CREATED -> { viewModel.addHandler()}
+            Lifecycle.State.STARTED -> { viewModel.addHandler()}
+            Lifecycle.State.RESUMED -> { viewModel.addHandler()}
+        }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.navChannel.collectLatest {
+            viewModel.removeHandler()
             if(it == "logout") {
                 onLogout()
             }
@@ -43,7 +60,10 @@ fun ScreenHome(viewModel: HomeViewModel = androidx.lifecycle.viewmodel.compose.v
     val devices = viewModel.devicesState.collectAsState(initial = emptyList())
     Scaffold(
         topBar = {
-            IoTAppBar(title = "IoT Application", onLogout = onLogout)
+            IoTAppBar(title = "IoT Application", onLogout = {
+                viewModel.removeHandler()
+                onLogout()
+            })
         },
         content = {
             DeviceList(
@@ -56,7 +76,10 @@ fun ScreenHome(viewModel: HomeViewModel = androidx.lifecycle.viewmodel.compose.v
         floatingActionButton = {
             FloatingActionButtonAdd(
                 contentDesc = "Add device",
-                onClick = { onAddDevice() },
+                onClick = {
+                    viewModel.removeHandler()
+                    onAddDevice()
+                          },
             )
         }
     )

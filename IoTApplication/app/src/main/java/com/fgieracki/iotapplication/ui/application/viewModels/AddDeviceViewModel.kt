@@ -26,6 +26,8 @@ class AddDeviceViewModel(private val repository: Repository = DefaultRepository(
     val ssid: MutableStateFlow<String> = MutableStateFlow("")
     val password: MutableStateFlow<String> = MutableStateFlow("")
 
+//    val appWiFiManager: AppWiFiManager = AppWiFiManager()
+
     val navChannel = MutableSharedFlow<String>(extraBufferCapacity = 1)
 
     private val _toastChannel = MutableSharedFlow<String>(extraBufferCapacity = 1)
@@ -52,11 +54,34 @@ class AddDeviceViewModel(private val repository: Repository = DefaultRepository(
     }
 
     init {
+//        checkIfLocationIsEnabled()
+        requestAllPermissions()
         checkIfLocationIsEnabled()
         val intentFilter = IntentFilter()
         intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
         ContextCatcher.getContext().registerReceiver(wifiScanReceiver, intentFilter)
         updateWifiNetworkList()
+    }
+
+    private fun requestAllPermissions() {
+        ActivityCompat.requestPermissions(
+            ActivityCatcher.getActivity(),
+            arrayOf(
+                Manifest.permission.INTERNET,
+
+                Manifest.permission.ACCESS_NETWORK_STATE,
+                Manifest.permission.CHANGE_NETWORK_STATE,
+
+                Manifest.permission.ACCESS_WIFI_STATE,
+                Manifest.permission.CHANGE_WIFI_STATE,
+
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+            ),
+            1
+        )
+
+
     }
 
     private fun checkIfLocationIsEnabled() {
@@ -93,7 +118,7 @@ class AddDeviceViewModel(private val repository: Repository = DefaultRepository(
                 1
             )
         }
-        Log.d("AddDeviceViewModel", "permission not granted")
+        Log.d("AddDeviceViewModel", "permission not granted FINE LOCATION")
 
         sendToastIfWifiDisabled()
 
@@ -138,6 +163,11 @@ class AddDeviceViewModel(private val repository: Repository = DefaultRepository(
 
     fun connectDevice() {
         toastChannel.tryEmit("Connecting to device...")
+        Log.d("AddDeviceViewModel", "ssid: ${ssid.value}, password: ${password.value}")
+//        appWiFiManager.disconnectFromUserNetwork(ContextCatcher.getContext())
+//        appWiFiManager.connectToUserNetwork(ContextCatcher.getContext(), ssid.value, password.value)
+//
+//            appWiFiManager.disconnectFromUserNetwork(ContextCatcher.getContext())
 
         viewModelScope.launch() {
             val resource = repository.addDevice(ssid.value, password.value)
