@@ -28,9 +28,9 @@ public static class Program
         var mqttClient = mqttFactory.CreateMqttClient();
         // Use builder classes where possible in this project.
         var mqttClientOptions = new MqttClientOptionsBuilder()
-            .WithTcpServer("localhost", 1883)
-            .WithClientId("Publisher")
+            .WithTcpServer("srv3.enteam.pl", 8883)
             .WithCredentials("devicePublisher", "RVbySf#FV8*!xG4&o4j6")
+            .WithClientId("xlient")
             .Build();
         
 
@@ -38,9 +38,9 @@ public static class Program
         // The result from this message returns additional data which was sent 
         // from the server. Please refer to the MQTT protocol specification for details.
         var response = await mqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
-
+        //
         Console.WriteLine("The MQTT client is connected.");
-
+        
         Console.Write(response.ResponseInformation);
 
         return mqttClient;

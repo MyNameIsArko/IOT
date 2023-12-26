@@ -4,28 +4,36 @@ networks:
   dev:
     driver: bridge
 
-services:  
+services:
   httpserver:
-    image: httpserver
-    container_name: httpserver
+    image: nnatalia/iot:httpserver
     depends_on:
       - serverdb
       - authdb
+    container_name: httpserver
+    build:
+      context: ./HttpServer
+      dockerfile: Dockerfile
+    environment:
+      - 'ASPNETCORE_URLS=Development'
     ports:
       - '80:5000'
     networks:
       - dev
 
   mqttserver:
+    image: nnatalia/iot:mqttserver
     container_name: mqttserver
-    image: mqttserver
+    build:
+      context: ./MqttServer
+      dockerfile: Dockerfile
     ports:
       - '1883:1883'
     networks:
       - dev
 
   serverdb:
-    image: postgres:latest
+    image: nnatalia/iot:postgres
     container_name: serverdb
     environment:
       - 'POSTGRES_USER=postgres'
@@ -40,7 +48,7 @@ services:
       - dev
   
   authdb:
-    image: postgres:latest
+    image: nnatalia/iot:postgres
     container_name: authdb
     environment:
       - 'POSTGRES_USER=postgres'

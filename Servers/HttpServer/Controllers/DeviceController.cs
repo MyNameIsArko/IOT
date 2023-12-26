@@ -3,6 +3,7 @@ using HttpServer.Communication.Requests;
 using HttpServer.Communication.Responses;
 using HttpServer.Data.Models;
 using HttpServer.Listeners;
+using HttpServer.Logger;
 using HttpServer.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -28,10 +29,13 @@ public class DeviceController : Controller
 
     private readonly IListenersManager _listenersManager;
     
+    private readonly LoggerMock _logger;
+
     private readonly ITokenService _tokenService;
 
     public DeviceController(UserManager<IdentityUser> userManager, IDeviceRepository deviceRepository,
-        ITopicDataRepository topicDataRepository, ITokenRepository tokenRepository, ITokenService tokenService, IListenersManager listenersManager)
+        ITopicDataRepository topicDataRepository, ITokenRepository tokenRepository, ITokenService tokenService,
+        IListenersManager listenersManager, LoggerMock logger)
     {
         _userManager = userManager;
         _deviceRepository = deviceRepository;
@@ -39,22 +43,24 @@ public class DeviceController : Controller
         _tokenRepository = tokenRepository;
         _tokenService = tokenService;
         _listenersManager = listenersManager;
+        _logger = logger;
     }
     
     [AllowAnonymous]
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDeviceRequest request)
     {
+        _logger.WriteLogs("Register device request received: " + request);
         if (!HttpContext.Request.Headers.TryGetValue("Authorization", out var authHeader) || !authHeader.ToString().StartsWith("Bearer "))
         {
-            return Unauthorized("No token provided");
+            return Unauthorized(new MessageResponse("No token provided"));
         }
 
         var token = authHeader.ToString()["Bearer ".Length..].Trim();
 
         if (!await _tokenRepository.DoesTokenExist(token, request.UserId))
         {
-            return Unauthorized("Unknown token");
+            return Unauthorized(new MessageResponse("Unknown token"));
         }
 
         await _tokenRepository.RemoveToken(token);
@@ -64,7 +70,7 @@ public class DeviceController : Controller
             var result = await RemoveDevice(deviceEntity);
             if (!result)
             {
-                return BadRequest("Device is already registered and could not be removed");
+                return BadRequest(new MessageResponse("Device is already registered and could not be removed"));
             }
         }
         
@@ -79,85 +85,92 @@ public class DeviceController : Controller
 
         if (!registrationResult)
         {
-            return BadRequest("The device could not be registered");
+            return BadRequest(new MessageResponse("The device could not be registered"));
         }
         
         _listenersManager.AddListenerToDevice(device);
-        return Ok("Device successfully registered");
+        
+        _logger.WriteLogs("Sending response: " + "Device successfully registered");
+        return Ok(new MessageResponse("Device successfully registered"));
     }
 
     [HttpPut("name")]
     public async Task<IActionResult> UpdateName([FromBody] UpdateNameRequest request)
     {
+        _logger.WriteLogs("Update name request received: " + request);
         var user = await GetUserFromToken(HttpContext.Request.Headers);
         if (user is null)
         {
-            return Unauthorized("User does not exist");
+            return Unauthorized(new MessageResponse("User does not exist"));
         }
         
         var device = await _deviceRepository.GetDevice(request.Mac);
         if (device is null)
         {
-            return BadRequest("The device does not exist");
+            return BadRequest(new MessageResponse("The device does not exist"));
         }
 
         if (!device.UserId.Equals(user.Id))
         {
-            return Unauthorized($"User: {user.UserName} is not the owner of device with mac: {request.Mac}");
+            return Unauthorized(new MessageResponse($"User: {user.UserName} is not the owner of device with mac: {request.Mac}"));
         }
 
         var result = await _deviceRepository.UpdateDeviceName(device.DeviceId, request.Name);
         if (!result)
         {
-            return BadRequest("Could not change device name");
+            return BadRequest(new MessageResponse("Could not change device name"));
         }
 
-        return Ok("Device name was successfully changed");
+        _logger.WriteLogs("Sending response: " + "Device name was successfully changed");
+        return Ok(new MessageResponse("Device name was successfully changed"));
     }
     
-    [HttpPost("remove")]
+    [HttpDelete("remove")]
     public async Task<IActionResult> Remove([FromBody] RemoveDeviceRequest request)
     {
+        _logger.WriteLogs("Remove request received: " + request);
         var user = await GetUserFromToken(HttpContext.Request.Headers);
         if (user is null)
         {
-            return Unauthorized();
+            return Unauthorized(new MessageResponse("User does not exist"));
         }
 
         var device = await _deviceRepository.GetDevice(request.Mac);
         if (device is null)
         {
-            return BadRequest("The device does not exist");
+            return BadRequest(new MessageResponse("The device does not exist"));
         }
 
         if (!device.UserId.Equals(user.Id))
         {
-            return Unauthorized($"User: {user.UserName} is not the owner of device with mac: {request.Mac}");
+            return Unauthorized(new MessageResponse($"User: {user.UserName} is not the owner of device with mac: {request.Mac}"));
         }
 
         var result = await RemoveDevice(device);
         if (!result)
         {
-            return BadRequest("Device could not be removed");
+            return BadRequest(new MessageResponse("Device could not be removed"));
         }
 
-        return Ok("Device successfully removed");
+        _logger.WriteLogs("Sending response: " + "Device successfully removed");
+        return Ok(new MessageResponse("Device successfully removed"));
     }
     
     [HttpGet("list")]
     public async Task<ActionResult<IEnumerable<Device>>> ListDevices()
     {
+        _logger.WriteLogs("List request received");
         var user = await GetUserFromToken(HttpContext.Request.Headers);
         if (user is null)
         {
-            return Unauthorized();
+            return Unauthorized(new MessageResponse("User does not exist"));
         }
 
         var devices = await _deviceRepository.GetUserDevices(user.Id);
         
         if (devices.IsNullOrEmpty())
         {
-            return Ok(new List<Device>());
+            return Ok(new DeviceListResponse(new List<DeviceResponse>()));
         }
 
         List<DeviceResponse> response = new();
@@ -176,16 +189,18 @@ public class DeviceController : Controller
             });
         }
 
-        return Ok(response);
+        _logger.WriteLogs("Sending response: " + response);
+        return Ok(new DeviceListResponse(response));
     }
 
     [HttpPost("token")]
     public async Task<ActionResult<string>> AddToken([FromBody] AddTokenRequest request)
     {
+        _logger.WriteLogs("Token request received: " + request);
         var user = await GetUserFromToken(HttpContext.Request.Headers);
         if (user is null)
         {
-            return Unauthorized();
+            return Unauthorized(new MessageResponse("User does not exist"));
         }
 
         var token = new Token
@@ -197,10 +212,11 @@ public class DeviceController : Controller
         var result = await _tokenRepository.AddToken(token);
         if (result)
         {
-            return Ok(user.Id);
+            _logger.WriteLogs("Sending response: " + user.Id);
+            return Ok(new UserIdResponse(user.Id));
         }
         
-        return BadRequest("Token could not be added");
+        return BadRequest(new MessageResponse("Token could not be added"));
     }
 
     private async Task<IdentityUser?> GetUserFromToken(IHeaderDictionary headers)
