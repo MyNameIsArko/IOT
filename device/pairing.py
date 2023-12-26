@@ -28,6 +28,8 @@ def send(req, resp):
     if all(item in parameters.keys() for item in ['ssid', 'password', 'jwt']):
         yield from picoweb.start_response(resp)
         yield from resp.awrite("Received")
+        with open('config.json', 'w') as f:
+            ujson.dump(parameters, f)
     else:
         yield from picoweb.start_response(resp, status='400')
         yield from resp.awrite("Bad request")
