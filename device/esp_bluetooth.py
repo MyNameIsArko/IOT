@@ -50,14 +50,23 @@ async def disconnect_connection(connection):
     await connection.disconnected()
 
 async def read_data(characteristic):
-    data = await characteristic.read()
+    is_reading = False
     whole_message = ""
-    while data != b"":
+    while True:
+        data = await characteristic.read()
         message = struct.unpack("<h", data) [0]
-        whole_message += message
+        if message == "END":
+            break
+        elif message == "START":
+            is_reading = True
+            continue
+        if is_reading:
+            whole_message += message
         data = await characteristic.read()
 
-    return whole_message
+    json_message = ujson.loads(whole_message)
+    return json_message
+
 
 async def write_data(characteristic, message):
     data = struct.pack("<h", message)
