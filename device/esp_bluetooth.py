@@ -54,7 +54,9 @@ async def read_data(characteristic):
     whole_message = ""
     while True:
         data = await characteristic.read()
+        print(f'{data=}')
         message = struct.unpack("<h", data) [0]
+        print(f'{message=}')
         if message == "END":
             break
         elif message == "START":
