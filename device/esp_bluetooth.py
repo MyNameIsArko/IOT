@@ -23,30 +23,17 @@ _ADV_INTERVAL_MS = 250_000
 
 
 # Register GATT server.
-temp_service = aioble.Service(_ENV_SENSE_UUID)
-temp_characteristic = aioble.Characteristic(
-    temp_service, _ENV_SENSE_TEMP_UUID, read=True, notify=True
-)
-aioble.register_services(temp_service)
-
-
-# Helper to encode the temperature characteristic encoding (sint16, hundredths of a degree).
-def _encode_temperature(temp_deg_c):
-    return struct.pack("<h", int(temp_deg_c * 100))
-
-
-# This would be periodically polling a hardware sensor.
-async def sensor_task():
-    t = 24.5
-    while True:
-        temp_characteristic.write(_encode_temperature(t))
-        t += random.uniform(-0.5, 0.5)
-        await asyncio.sleep_ms(1000)
-
+def get_characteristic():
+    service = aioble.Service(_ENV_SENSE_UUID)
+    characteristic = aioble.Characteristic(
+        service, _ENV_SENSE_TEMP_UUID, read=True, notify=True
+    )
+    aioble.register_services(service)
+    return characteristic
 
 # Serially wait for connections. Don't advertise while a central is
 # connected.
-async def peripheral_task():
+async def discover_bluetooth(characteristic):
     while True:
         async with await aioble.advertise(
             _ADV_INTERVAL_MS,
@@ -55,15 +42,23 @@ async def peripheral_task():
             appearance=_ADV_APPEARANCE_GENERIC_THERMOMETER,
         ) as connection:
             print("Connection from", connection.device)
-            temp_characteristic.notify(connection)
-            await connection.disconnected()
+            characteristic.notify(connection)
+            # await connection.disconnected()
+            return connection
+    
+async def disconnect_connection(connection):
+    await connection.disconnected()
 
+async def read_data(characteristic):
+    data = await characteristic.read()
+    whole_message = ""
+    while data != b"":
+        message = struct.unpack("<h", data) [0]
+        whole_message += message
+        data = await characteristic.read()
 
-# Run both tasks.
-async def main():
-    t1 = asyncio.create_task(sensor_task())
-    t2 = asyncio.create_task(peripheral_task())
-    await asyncio.gather(t1, t2)
+    return whole_message
 
-
-asyncio.run(main())
+async def write_data(characteristic, message):
+    data = struct.pack("<h", message)
+    await characteristic.write()
