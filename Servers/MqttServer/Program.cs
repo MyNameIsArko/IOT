@@ -32,7 +32,6 @@ public static class Program
             app.UseMqttServer(
                 server =>
                 {
-                    
                     server.ValidatingConnectionAsync += mqttController.ValidateConnection;
                     server.ClientConnectedAsync += mqttController.OnClientConnected;
                     server.ClientDisconnectedAsync += mqttController.OnClientDisconnected;

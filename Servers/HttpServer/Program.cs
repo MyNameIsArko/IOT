@@ -3,6 +3,7 @@ using HttpServer.Authentication;
 using HttpServer.Configuration;
 using HttpServer.Data.DbContext;
 using HttpServer.Listeners;
+using HttpServer.Logger;
 using HttpServer.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -41,6 +42,8 @@ builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
 builder.Services.AddScoped<ITopicDataRepository, TopicDataRepository>();
 builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 builder.Services.AddScoped<IListenersManager, ListenersManager>();
+builder.Services.AddScoped<LoggerMock>();
+
 
 var signingKey = Encoding.UTF8.GetBytes(AppConfiguration.GetJwtOptions().EncryptionKey);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
