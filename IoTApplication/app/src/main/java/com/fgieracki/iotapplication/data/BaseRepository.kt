@@ -1,6 +1,6 @@
 package com.fgieracki.iotapplication.data
 
-import com.fgieracki.iotapplication.data.model.Resource
+import com.fgieracki.iotapplication.domain.model.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
@@ -12,17 +12,19 @@ abstract class BaseRepository {
         return withContext(Dispatchers.IO) {
             try {
                 val response: Response<T> = apiToBeCalled()
-
                 if (response.isSuccessful) {
                     Resource.Success(data = response.body()!!)
                 } else {
+                    print(response)
                     Resource.Error(errorMessage = "Something went wrong: ${response.message()}", code = response.code())
                 }
             } catch (e: HttpException) {
                 Resource.Error(errorMessage = e.message ?: "Something went wrong", code = e.code())
             } catch (e: IOException) {
+                print(e)
                 Resource.Error("Please check your network connection", code = 500)
             } catch (e: Exception) {
+                print(e)
                 Resource.Error(errorMessage = "Something went wrong", code = 500)
             }
         }

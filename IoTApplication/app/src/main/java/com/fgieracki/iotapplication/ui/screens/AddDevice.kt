@@ -1,4 +1,4 @@
-package com.fgieracki.iotapplication.ui.application.screens
+package com.fgieracki.iotapplication.ui.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
@@ -16,7 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.fgieracki.iotapplication.ui.application.viewModels.AddDeviceViewModel
+import com.fgieracki.iotapplication.di.viewModels.AddDeviceViewModel
 import com.fgieracki.iotapplication.ui.components.AddDeviceAppBar
 import com.fgieracki.iotapplication.ui.components.AddDeviceDialog
 import com.fgieracki.iotapplication.ui.components.NetworkList

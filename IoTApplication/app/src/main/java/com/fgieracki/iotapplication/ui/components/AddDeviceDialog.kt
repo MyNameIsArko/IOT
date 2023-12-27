@@ -17,7 +17,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +41,7 @@ fun AddDeviceDialog(
     ssid: String = "",
     password: String = "",
     onPasswordChange: (String) -> Unit = {},
+    onSsidChange: (String) -> Unit = {}
 ) {
     val passwordVisible = remember { mutableStateOf(false) }
 
@@ -61,15 +61,7 @@ fun AddDeviceDialog(
         ) {
             OutlinedTextField(
                 value = ssid,
-                onValueChange = {},
-                readOnly = true,
-                enabled = false,
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = IoTAmaranth,
-                    disabledBorderColor = IoTAmaranth,
-                    cursorColor = IoTBlue,
-                    disabledTextColor = Color.Black,
-                )
+                onValueChange = { onSsidChange(it) },
             )
             Spacer(modifier = Modifier.padding(8.dp))
 

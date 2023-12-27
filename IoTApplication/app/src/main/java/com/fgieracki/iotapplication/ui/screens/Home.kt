@@ -1,4 +1,4 @@
-package com.fgieracki.iotapplication.ui.application.screens
+package com.fgieracki.iotapplication.ui.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.padding
@@ -8,12 +8,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.lifecycle.Lifecycle
-import com.fgieracki.iotapplication.ui.application.viewModels.HomeViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.fgieracki.iotapplication.di.viewModels.HomeViewModel
 import com.fgieracki.iotapplication.ui.components.DeviceList
 import com.fgieracki.iotapplication.ui.components.FloatingActionButtonAdd
 import com.fgieracki.iotapplication.ui.components.IoTAppBar
@@ -26,25 +24,16 @@ fun ScreenHome(viewModel: HomeViewModel = androidx.lifecycle.viewmodel.compose.v
                onLogout: () -> Unit = {},
                onAddDevice: () -> Unit = {},
 ) {
-
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val lifecycleState by lifecycleOwner.lifecycle.currentStateFlow.collectAsState()
-
-    LaunchedEffect(lifecycleState) {
-        when (lifecycleState) {
-            Lifecycle.State.DESTROYED -> { viewModel.removeHandler() }
-            Lifecycle.State.INITIALIZED -> { }
-            Lifecycle.State.CREATED -> { viewModel.addHandler()}
-            Lifecycle.State.STARTED -> { viewModel.addHandler()}
-            Lifecycle.State.RESUMED -> { viewModel.addHandler()}
-        }
-    }
+    viewModel.updateDevicesFlow.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.navChannel.collectLatest {
-            viewModel.removeHandler()
             if(it == "logout") {
                 onLogout()
+            }
+            else
+                if(it == "addDevice") {
+                onAddDevice()
             }
         }
     }
@@ -53,7 +42,7 @@ fun ScreenHome(viewModel: HomeViewModel = androidx.lifecycle.viewmodel.compose.v
     LaunchedEffect(Unit) {
         viewModel.toastChannel.collectLatest {
             Toast.makeText(context, it,
-                Toast.LENGTH_LONG).show()
+                Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -61,7 +50,6 @@ fun ScreenHome(viewModel: HomeViewModel = androidx.lifecycle.viewmodel.compose.v
     Scaffold(
         topBar = {
             IoTAppBar(title = "IoT Application", onLogout = {
-                viewModel.removeHandler()
                 onLogout()
             })
         },
@@ -77,9 +65,9 @@ fun ScreenHome(viewModel: HomeViewModel = androidx.lifecycle.viewmodel.compose.v
             FloatingActionButtonAdd(
                 contentDesc = "Add device",
                 onClick = {
-                    viewModel.removeHandler()
-                    onAddDevice()
-                          },
+                    if(viewModel.requestAllPermissions())
+                        onAddDevice()
+                    },
             )
         }
     )

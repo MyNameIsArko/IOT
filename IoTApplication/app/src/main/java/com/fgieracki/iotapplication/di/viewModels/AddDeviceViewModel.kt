@@ -1,4 +1,4 @@
-package com.fgieracki.iotapplication.ui.application.viewModels
+package com.fgieracki.iotapplication.di.viewModels
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -12,14 +12,12 @@ import android.net.wifi.WifiManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.fgieracki.iotapplication.data.DefaultRepository
 import com.fgieracki.iotapplication.data.Repository
 import com.fgieracki.iotapplication.data.local.ActivityCatcher
 import com.fgieracki.iotapplication.data.local.ContextCatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 
 @SuppressLint("MissingPermission")
 class AddDeviceViewModel(private val repository: Repository = DefaultRepository()) : ViewModel() {
@@ -77,11 +75,8 @@ class AddDeviceViewModel(private val repository: Repository = DefaultRepository(
 
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
-            ),
-            1
+            ), 1
         )
-
-
     }
 
     private fun checkIfLocationIsEnabled() {
@@ -169,14 +164,14 @@ class AddDeviceViewModel(private val repository: Repository = DefaultRepository(
 //
 //            appWiFiManager.disconnectFromUserNetwork(ContextCatcher.getContext())
 
-        viewModelScope.launch() {
-            val resource = repository.addDevice(ssid.value, password.value)
-            if (resource.data != null) {
-                navChannel.emit("deviceList")
-            } else {
-                toastChannel.tryEmit("Failed to connect to device. Try again!")
-            }
-        }
+//        viewModelScope.launch() {
+//            val resource = repository.addDevice(ssid.value, password.value)
+//            if (resource.data != null) {
+//                navChannel.emit("deviceList")
+//            } else {
+//                toastChannel.tryEmit("Failed to connect to device. Try again!")
+//            }
+//        }
 
     }
 
