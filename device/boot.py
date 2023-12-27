@@ -11,8 +11,8 @@ async def main():
     while not isconnected:
         if not isconnected:
             if connection is None:
-                connection = await esp_bluetooth.discover_bluetooth(characteristic)
                 characteristic = esp_bluetooth.get_characteristic()
+                connection = await esp_bluetooth.discover_bluetooth(characteristic)
             data = await esp_bluetooth.read_data(characteristic)
             with open("config.json", "w") as file:
                 file.write(data)
