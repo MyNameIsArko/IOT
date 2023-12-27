@@ -43,7 +43,7 @@ async def discover_bluetooth(characteristic):
         ) as connection:
             print("Connection from", connection.device)
             characteristic.notify(connection)
-            # await connection.disconnected()
+            await connection.disconnected()
             return connection
     
 async def disconnect_connection(connection):
@@ -53,6 +53,7 @@ async def read_data(characteristic):
     is_reading = False
     whole_message = ""
     while True:
+        await characteristic.written()
         data = await characteristic.read()
         print(f'{data=}')
         message = struct.unpack("<h", data) [0]
