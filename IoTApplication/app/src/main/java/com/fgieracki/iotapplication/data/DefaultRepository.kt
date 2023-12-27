@@ -20,24 +20,29 @@ class DefaultRepository : Repository() {
     private var USER_TOKEN = "Token"
     private val sharedPreference =  ContextCatcher.getContext().getSharedPreferences("USER_DATA", Context.MODE_PRIVATE)
 
-    private fun getToken() {
+    private fun updateToken() {
         val token: String = sharedPreference.getString("USER_TOKEN", "Token")?:"Token"
         USER_TOKEN = token
     }
 
+    private fun getToken(): String {
+        return sharedPreference.getString("USER_TOKEN", "Token")?:"Token"
+    }
+
     override suspend fun login(username: String, password: String): Resource<LoginResponse> {
+//        return api.login(LoginData(username, password))
         return safeApiCall{ api.login(LoginData(username, password)) }
     }
 
     override suspend fun register(username: String, password: String): Resource<StringResponse> {
+//        return api.register(LoginData(username, password))
         return safeApiCall{ api.register(LoginData(username, password)) }
     }
 
     override suspend fun getDevices(): Flow<Resource<List<Device>>> = flow<Resource<List<Device>>>{
-
-        val apiResponse = safeApiCall{ api.getDevices(token = USER_TOKEN) }
+        val apiResponse = safeApiCall{ api.getDevices(token = getToken()) }
         if(apiResponse is Resource.Success) {
-            val devices = apiResponse.data!!.map { it.toDevice() }
+            val devices = apiResponse.data!!.devices.map { it.toDevice() }
             emit(Resource.Success(devices))
         }
         else {

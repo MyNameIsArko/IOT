@@ -31,7 +31,8 @@ fun ScreenHome(viewModel: HomeViewModel = androidx.lifecycle.viewmodel.compose.v
             if(it == "logout") {
                 onLogout()
             }
-            else if(it == "addDevice") {
+            else
+                if(it == "addDevice") {
                 onAddDevice()
             }
         }
@@ -41,7 +42,7 @@ fun ScreenHome(viewModel: HomeViewModel = androidx.lifecycle.viewmodel.compose.v
     LaunchedEffect(Unit) {
         viewModel.toastChannel.collectLatest {
             Toast.makeText(context, it,
-                Toast.LENGTH_LONG).show()
+                Toast.LENGTH_SHORT).show()
         }
     }
 

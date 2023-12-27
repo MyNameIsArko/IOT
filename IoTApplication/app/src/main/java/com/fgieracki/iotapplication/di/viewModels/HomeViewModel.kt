@@ -40,6 +40,7 @@ class HomeViewModel(private val repository: Repository = DefaultRepository()) : 
             Log.d("HomeViewModel", "updateDevicesState")
             val resource = resourceFlow.collect {
                 if(it is Resource.Error) {
+                    print("Error: ${it.code}: ${it.message}")
                     if(it.code == 401) {
                         navChannel.emit("logout")
                     }

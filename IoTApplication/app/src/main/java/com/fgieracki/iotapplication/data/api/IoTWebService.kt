@@ -1,6 +1,6 @@
 package com.fgieracki.iotapplication.data.api
 
-import com.fgieracki.iotapplication.data.api.model.DeviceResponse
+import com.fgieracki.iotapplication.data.api.model.DeviceListResponse
 import com.fgieracki.iotapplication.data.api.model.LoginData
 import com.fgieracki.iotapplication.data.api.model.LoginResponse
 import com.fgieracki.iotapplication.data.api.model.StringResponse
@@ -14,7 +14,8 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 
 object IoTWebService {
-    private const val SERVER_URL = "https://srv3.enteam.pl:180/"
+//    private const val SERVER_URL = "http://srv3.enteam.pl:180/"
+    private const val SERVER_URL = "http://192.168.0.197:80"
 
     val api: IoTApi by lazy {
         retrofit.create(IoTApi::class.java)
@@ -35,7 +36,7 @@ object IoTWebService {
         suspend fun register(@Body loginData: LoginData): Response<StringResponse>
 
         @GET("api/Device/list")
-        suspend fun getDevices(@Header("Authorization") token: String): Response<List<DeviceResponse>>
+        suspend fun getDevices(@Header("Authorization") token: String): Response<DeviceListResponse>
 
         @POST("api/Device/token")
         suspend fun generateToken(@Header("Authorization") token: String,

@@ -54,26 +54,20 @@ class SignInViewModel(private val repository: Repository = DefaultRepository()) 
     }
 
     fun login() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val resource = repository.login(inputFields.value.username, inputFields.value.password)
-            if (resource.data != null) {
-                val token = resource.data.token
-                token.let {}
-                USER_TOKEN = token
-                val editor = sharedPreference.edit()
-                editor.putString("USER_TOKEN", token)
-                editor.apply()
-
-                clearInputs()
-                navChannel.tryEmit("OK")
-            }
-
-            else {
-                toastChannel.emit("Login failed: " + resource.message)
-            }
-
-            navChannel.tryEmit("OK")
-        }
+//        viewModelScope.launch(Dispatchers.IO) {
+//            val response = repository.login(inputFields.value.username, inputFields.value.password)
+//            if (response.data != null) {
+//                val editor = sharedPreference.edit()
+//                print("RESPONSE: " + response.data)
+//                editor.putString("USER_TOKEN", "Bearer " + response.data.token)
+//                editor.commit()
+//                toastChannel.tryEmit("Login successful")
+//                navChannel.tryEmit("Home")
+//            } else {
+//                toastChannel.emit("Login failed: " + response.message)
+//            }
+//        }
+        navChannel.tryEmit("Home")
     }
 
     fun register() {

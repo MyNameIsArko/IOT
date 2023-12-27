@@ -11,12 +11,7 @@ abstract class BaseRepository {
     suspend fun <T> safeApiCall(apiToBeCalled: suspend () -> Response<T>): Resource<T> {
         return withContext(Dispatchers.IO) {
             try {
-                println("API CALL: 1")
-
                 val response: Response<T> = apiToBeCalled()
-                println("API CALL: 2")
-
-
                 if (response.isSuccessful) {
                     Resource.Success(data = response.body()!!)
                 } else {
@@ -29,6 +24,7 @@ abstract class BaseRepository {
                 print(e)
                 Resource.Error("Please check your network connection", code = 500)
             } catch (e: Exception) {
+                print(e)
                 Resource.Error(errorMessage = "Something went wrong", code = 500)
             }
         }
