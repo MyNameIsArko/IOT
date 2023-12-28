@@ -91,7 +91,11 @@ class BaseCharacteristic:
         if self._value_handle is None:
             return self._initial or b""
         else:
-            return ble.gatts_read(self._value_handle)
+            print("before a")
+            a = ble.gatts_read(self._value_handle)
+            print(f"{a=}")
+            return a
+            # return ble.gatts_read(self._value_handle)
 
     # Write value to local db, and optionally notify/indicate subscribers.
     def write(self, data, send_update=False):
@@ -243,6 +247,14 @@ class Characteristic(BaseCharacteristic):
         self.flags = flags
         self._value_handle = None
         self._initial = initial
+
+
+    def read(self):
+        print("before super")
+        # b = super().read()
+        # print(f"{b=}")
+        return b"DUPA"
+
 
     # Generate tuple for gatts_register_services.
     def _tuple(self):

@@ -14,8 +14,7 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 
 object IoTWebService {
-//    private const val SERVER_URL = "http://srv3.enteam.pl:180/"
-    private const val SERVER_URL = "http://192.168.0.197:80"
+    private const val SERVER_URL = "http://srv3.enteam.pl:180/"
 
     val api: IoTApi by lazy {
         retrofit.create(IoTApi::class.java)

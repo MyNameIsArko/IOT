@@ -51,7 +51,7 @@ class DefaultRepository : Repository() {
     }
 
     override suspend fun generateToken(tokenData: TokenData): Resource<StringResponse> {
-        return safeApiCall{ api.generateToken(USER_TOKEN, tokenData) }
+        return safeApiCall{ api.generateToken(getToken(), tokenData) }
     }
 
 //    override suspend fun addDevice(ssid: String, psswd: String): Resource<String> {

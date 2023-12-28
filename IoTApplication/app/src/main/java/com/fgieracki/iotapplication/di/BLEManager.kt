@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothManager
 import android.content.Intent
 import com.fgieracki.iotapplication.data.local.ContextCatcher
 import com.juul.kable.AndroidAdvertisement
+import com.juul.kable.Filter
 import com.juul.kable.Scanner
 import com.juul.kable.peripheral
 import com.juul.kable.read
@@ -16,11 +17,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
+import java.lang.Thread.sleep
 
 class BLEManager {
     val scanner = Scanner {
         filters = listOf( // SensorTag
-//            Filter.NamePrefix("ESP"),
+            Filter.NamePrefix("ESP"),
         )
     }
 
@@ -73,11 +75,15 @@ class BLEManager {
         val peripheral = scope
             .peripheral(advertisement = advertisement) {
                 onServicesDiscovered {
-                    requestMtu(100)
+                    requestMtu(1500)
                 }
             }
 
         peripheral.connect()
+        sleep(1000)
+//        peripheral.state.collect {
+//            println(it.toString())
+//        }
 
         val writeCharacteristics = peripheral.services?.firstNotNullOfOrNull {
             it.characteristics.firstOrNull {
@@ -87,6 +93,7 @@ class BLEManager {
 
         val readCharacteristics = peripheral.services?.firstNotNullOfOrNull {
             it.characteristics.filter {
+                println(it.serviceUuid)
                 println(it.characteristicUuid)
                 it.properties.read
             }.also {
@@ -100,14 +107,22 @@ class BLEManager {
         } ?: throw IllegalArgumentException("No read characteristics found")
 
         val textToSend =
-            "{\"?ssid\":\"$ssid\"," +
+            "{\"ssid\":\"$ssid\"," +
             "\"password\":\"$password\"," +
             " \"token\":\"${token}\"," +
             "\"hash\":$hash}"
 
         peripheral.write(
             characteristic = writeCharacteristics,
+            "START".toByteArray(),
+        )
+        peripheral.write(
+            characteristic = writeCharacteristics,
             textToSend.toByteArray(),
+        )
+        peripheral.write(
+            characteristic = writeCharacteristics,
+            "END".toByteArray(),
         )
         println("Write success, waiting for disconnect")
 
