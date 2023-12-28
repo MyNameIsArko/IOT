@@ -28,13 +28,16 @@ _ADV_INTERVAL_MS = 250_000
 _BMS_MTU = const(128)
 
 core.config(mtu=_BMS_MTU)
-core.ble.gattc_exchange_mtu(_BMS_MTU)
+# core.ble.gattc_exchange_mtu(_BMS_MTU)
 
 # Register GATT server.
 def get_characteristic():
     service = aioble.Service(_ENV_SENSE_UUID)
     characteristic = aioble.BufferedCharacteristic(
-        service, _ENV_SENSE_TEMP_UUID, notify=True, write=True, read=True, max_len=_BMS_MTU, append=True, capture=True
+        service, _ENV_SENSE_TEMP_UUID, notify=True,
+        write=True, read=True,
+        max_len=2000, append=True,
+        capture=True, write_no_response=True
     )
     aioble.register_services(service)
     return characteristic
