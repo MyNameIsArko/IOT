@@ -32,4 +32,5 @@ async def main():
         esp_bluetooth.disconnect_connection(connection)
         
 if machine.reset_cause() != machine.SOFT_RESET:
+    log.info("Starting parining sequence")
     asyncio.run(main())

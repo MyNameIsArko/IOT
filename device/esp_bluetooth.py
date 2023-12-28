@@ -51,12 +51,11 @@ async def discover_bluetooth(characteristic):
         return connection
     
 async def disconnect_connection(connection):
-    log.info("Disconnecting device")
+    log.info(f'Device: {connection.device} disconnected')
     await connection.disconnect()
 
 async def read_data(characteristic):
     log.info("Reading data")
-    is_reading = False
     whole_message = ""
     while True:
         await characteristic.written()
@@ -64,17 +63,12 @@ async def read_data(characteristic):
         data = ble.gatts_read(characteristic._value_handle)
         message = str(data, 'utf-8')
         log.info(f'{message=}')
-        if message == "END":
+        if message.startswith("START") and message.endswith("END"):
+            whole_message = message[5:-3]
             break
-        elif message == "START":
-            is_reading = True
-            continue
-        if is_reading:
-            whole_message += message
 
-    log.info("Converting to json")
-    json_message = ujson.loads(whole_message)
-    return json_message
+    log.info("Received whole message")
+    return whole_message
 
 
 async def write_data(characteristic, message):
