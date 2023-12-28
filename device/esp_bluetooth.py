@@ -25,12 +25,13 @@ _ADV_APPEARANCE_GENERIC_THERMOMETER = const(768)
 # How frequently to send advertising beacons.
 _ADV_INTERVAL_MS = 250_000
 
+ble.config(rxbuf=2000, mtu=2000)
 
 # Register GATT server.
 def get_characteristic():
     service = aioble.Service(_ENV_SENSE_UUID)
     characteristic = aioble.BufferedCharacteristic(
-        service, _ENV_SENSE_TEMP_UUID, notify=True, write=True, read=True, max_len=999, append=True, capture=True
+        service, _ENV_SENSE_TEMP_UUID, notify=True, write=True, read=True, max_len=2000, append=True, capture=True
     )
     aioble.register_services(service)
     return characteristic
