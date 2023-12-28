@@ -57,11 +57,13 @@ async def disconnect_connection(connection):
 async def read_data(characteristic):
     log.info("Reading data")
     whole_message = ""
+    is_reading = False
+    await characteristic.written()
     while True:
-        await characteristic.written()
         # implement reading data from scratch
         data = ble.gatts_read(characteristic._value_handle)
-        is_reading = False
+        if data is None:
+            break
         message = str(data, 'utf-8')
         log.info(f'{message=}')
         if message.startswith("START{"):
@@ -74,6 +76,7 @@ async def read_data(characteristic):
             whole_message += message
 
     log.info("Received whole message")
+    log.info(f'{whole_message=}')
     return whole_message
 
 
