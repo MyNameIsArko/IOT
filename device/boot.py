@@ -4,11 +4,12 @@ ulogging.basicConfig(level=ulogging.INFO)
 
 import machine
 import asyncio
-import send_request
-import crypto
 import ujson
-import mqtt
 
+import esp_request
+import esp_crypto
+import esp_sensor
+import esp_mqtt
 
 log = ulogging.getLogger('BOOT')
 
@@ -60,14 +61,17 @@ async def main():
             esp_bluetooth.disconnect_connection(connection)
     
     log.info("Registering device")
-    api_client = send_request.APIClient()
+    api_client = esp_request.APIClient()
     api_client.send_info(config['token'], config['user_id'], config['mac'])
 
     log.info("Setup encryption")
-    encryption = crypto.Encryption(config['aes_key'], config['aes_iv'])
+    encryption = esp_crypto.Encryption(config['aes_key'], config['aes_iv'])
+
+    log.info("Getting sensor")
+    sensor = esp_sensor.DHT22()
 
     log.info("Starting MQTT client")
-    mqtt_client = mqtt.Broker(config['mac'], config['sensor'], encryption)
+    mqtt_client = esp_mqtt.Broker(config['mac'], sensor, encryption)
     while True:
         if mqtt_client.connect():
             mqtt_client.start_pushing()
