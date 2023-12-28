@@ -30,7 +30,7 @@ _ADV_INTERVAL_MS = 250_000
 def get_characteristic():
     service = aioble.Service(_ENV_SENSE_UUID)
     characteristic = aioble.BufferedCharacteristic(
-        service, _ENV_SENSE_TEMP_UUID, notify=True, write=True, read=True, max_len=999, capture=True
+        service, _ENV_SENSE_TEMP_UUID, notify=True, write=True, read=True, max_len=999, append=True, capture=True
     )
     aioble.register_services(service)
     return characteristic
