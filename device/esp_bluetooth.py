@@ -7,7 +7,7 @@ from micropython import const
 import uasyncio as asyncio
 import aioble
 import ubluetooth
-from aioble.core import ble
+import aioble.core as core
 
 import random
 import struct
@@ -25,7 +25,7 @@ _ADV_APPEARANCE_GENERIC_THERMOMETER = const(768)
 # How frequently to send advertising beacons.
 _ADV_INTERVAL_MS = 250_000
 
-ble.config(rxbuf=2000, mtu=2000)
+core.config(rxbuf=2000, mtu=2000)
 
 # Register GATT server.
 def get_characteristic():
