@@ -20,11 +20,11 @@ def get_config():
             config = ujson.load(file)
         
         if 'ssid' not in config or 'password' not in config or 'user_id' not in config or 'mac' not in config or 'token' not in config or 'aes_key' not in config or 'aes_iv' not in config:
-            log.error("Bad config.json file")
+            log.warning("Bad config.json file")
             return None
         return config
     except OSError:
-        log.error("No config.json file found")
+        log.warning("No config.json file found")
         return None
 
 async def main():

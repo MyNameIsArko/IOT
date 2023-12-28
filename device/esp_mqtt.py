@@ -31,7 +31,7 @@ class Broker:
             self.client = client
             return True
         except OSError:
-            log.error('Failed to connect to MQTT broker. Reconnecting')
+            log.warning('Failed to connect to MQTT broker. Reconnecting')
             return False
 
     def start_pushing(self):
@@ -56,5 +56,5 @@ class Broker:
                     self.client.publish(self.humidity_topic, humidity_msg)
                     last_message = time.time()
             except OSError:
-                log.error('Failed to push data to MQTT broker. Reconnecting')
+                log.warning('Failed to push data to MQTT broker. Reconnecting')
         

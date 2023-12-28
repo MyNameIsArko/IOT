@@ -14,7 +14,7 @@ def connect_to_wifi(ssid, password):
     timer = 0
     while not sta.isconnected():
         if timer > 10:
-            log.error("Wifi doesn't exists or bad credentials.")
+            log.warning("Wifi doesn't exists or bad credentials.")
             return False
         time.sleep(1)
         timer += 1
