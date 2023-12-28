@@ -58,8 +58,8 @@ async def read_data(characteristic):
     log.info("Reading data")
     whole_message = ""
     is_reading = False
-    await characteristic.written()
     while True:
+        await characteristic.written()
         # implement reading data from scratch
         data = ble.gatts_read(characteristic._value_handle)
         if data is None:
@@ -69,11 +69,11 @@ async def read_data(characteristic):
         if message.startswith("START{"):
             whole_message += message[5:]
             is_reading = True
-        elif message.endswith("}END"):
-            whole_message += message[:-3]
-            break
         elif is_reading:
             whole_message += message
+        if whole_message.endswith("}END"):
+            whole_message = whole_message[:-3]
+            break
 
     log.info("Received whole message")
     log.info(f'{whole_message=}')
