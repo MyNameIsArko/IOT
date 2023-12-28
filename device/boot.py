@@ -1,22 +1,48 @@
-import machine
-import esp_bluetooth
-import asyncio
 import ulogging
 
 ulogging.basicConfig(level=ulogging.INFO)
 
+import machine
+import asyncio
+import send_request
+import crypto
+import ujson
+import mqtt
+
+
 log = ulogging.getLogger('BOOT')
 
+def get_config():
+    log.info("Reading config.json")
+    try:
+        with open("config.json", "r") as file:
+            config = ujson.load(file)
+        
+        if 'ssid' not in config or 'password' not in config or 'user_id' not in config or 'mac' not in config or 'token' not in config or 'aes_key' not in config or 'aes_iv' not in config:
+            log.error("Bad config.json file")
+            return None
+        return config
+    except OSError:
+        log.error("No config.json file found")
+        return None
+
 async def main():
-    import pairing
-    # Soft reset doesn't restart WLAN
-    isconnected = pairing.enter_pairing()
-    connection = None
-    characteristic = None
+    import esp_wifi
+    import esp_bluetooth
+
+    isconnected = False
+
+    config = get_config()
+    if config is not None:
+        isconnected = esp_wifi.connect_to_wifi(config['ssid'], config['password'])
+
     if not isconnected:
         log.info("Starting bluetooth configuration")
-    while not isconnected:
-        if not isconnected:
+
+        connection = None
+        characteristic = None
+
+        while not isconnected:
             if connection is None:
                 characteristic = esp_bluetooth.get_characteristic()
                 connection = await esp_bluetooth.discover_bluetooth(characteristic)
@@ -24,12 +50,30 @@ async def main():
             log.info("Writing data to config.json")
             with open("config.json", "w") as file:
                 file.write(data)
-            log.info("Trying with new credentials")
-            isconnected = pairing.enter_pairing()
+            log.info("Trying with new config")
+            config = get_config()
+            if config is not None:
+                isconnected = esp_wifi.connect_to_wifi(config['ssid'], config['password'])
     
-    if connection is not None:
-        esp_bluetooth.write_data(characteristic, "CONNECTED")
-        esp_bluetooth.disconnect_connection(connection)
+        if connection is not None:
+            esp_bluetooth.write_data(characteristic, "CONNECTED")
+            esp_bluetooth.disconnect_connection(connection)
+    
+    log.info("Registering device")
+    api_client = send_request.APIClient()
+    api_client.send_info(config['token'], config['user_id'], config['mac'])
+
+    log.info("Setup encryption")
+    encryption = crypto.Encryption(config['aes_key'], config['aes_iv'])
+
+    log.info("Starting MQTT client")
+    mqtt_client = mqtt.Broker(config['mac'], config['sensor'], encryption)
+    while True:
+        if mqtt_client.connect():
+            mqtt_client.start_pushing()
+        else:
+            await asyncio.sleep(5)
+
         
 if machine.reset_cause() != machine.SOFT_RESET:
     log.info("Starting parining sequence")
