@@ -25,7 +25,10 @@ _ADV_APPEARANCE_GENERIC_THERMOMETER = const(768)
 # How frequently to send advertising beacons.
 _ADV_INTERVAL_MS = 250_000
 
-core.config(rxbuf=2000, mtu=2000)
+_BMS_MTU = const(128)
+
+core.config(mtu=_BMS_MTU)
+core.ble.gattc_exchange_mtu(_BMS_MTU)
 
 # Register GATT server.
 def get_characteristic():
