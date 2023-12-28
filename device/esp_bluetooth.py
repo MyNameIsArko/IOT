@@ -29,8 +29,8 @@ _ADV_INTERVAL_MS = 250_000
 # Register GATT server.
 def get_characteristic():
     service = aioble.Service(_ENV_SENSE_UUID)
-    characteristic = aioble.Characteristic(
-        service, _ENV_SENSE_TEMP_UUID, notify=True, write=True, read=True
+    characteristic = aioble.BufferedCharacteristic(
+        service, _ENV_SENSE_TEMP_UUID, notify=True, write=True, read=True, max_len=999, capture=True
     )
     aioble.register_services(service)
     return characteristic
@@ -59,9 +59,9 @@ async def read_data(characteristic):
     whole_message = ""
     is_reading = False
     while True:
-        await characteristic.written()
         # implement reading data from scratch
-        data = ble.gatts_read(characteristic._value_handle)
+        conn, data = await characteristic.written()
+        # data = ble.gatts_read(characteristic._value_handle)
         if data is None:
             break
         message = str(data, 'utf-8')
