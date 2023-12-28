@@ -20,6 +20,6 @@ def connect_to_wifi(ssid, password):
         timer += 1
     if sta.isconnected():
         log.info('Connected to the network')
-        log.info('Network config:', sta.ifconfig())
+        log.info(f'Network config: {sta.ifconfig()}')
         return True
     return False

@@ -45,7 +45,7 @@ async def discover_bluetooth(characteristic):
         services=[_ENV_SENSE_UUID],
         appearance=_ADV_APPEARANCE_GENERIC_THERMOMETER,
     ) as connection:
-        log.info("Connection from", connection.device)
+        log.info(f"Connection from: {connection.device}")
         characteristic.notify(connection)
         await connection.disconnected()
         return connection
