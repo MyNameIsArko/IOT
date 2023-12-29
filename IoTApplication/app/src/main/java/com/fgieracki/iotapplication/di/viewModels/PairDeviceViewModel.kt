@@ -16,6 +16,7 @@ import com.fgieracki.iotapplication.di.EncryptionManager
 import com.fgieracki.iotapplication.di.TokenGenerator
 import com.juul.kable.AndroidAdvertisement
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -23,13 +24,16 @@ class PairDeviceViewModel(private val repository: Repository = DefaultRepository
     private val _scannedDevices = MutableStateFlow<List<AndroidAdvertisement>>(emptyList())
     val scannedDevices = _scannedDevices
 
+    private val _toastChannel = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val toastChannel = _toastChannel
+
     private var chosenDevice: AndroidAdvertisement? = null
     val ssid: MutableStateFlow<String> = MutableStateFlow("")
     val password: MutableStateFlow<String> = MutableStateFlow("")
 
     private val sharedPreference =  ContextCatcher.getContext().getSharedPreferences("USER_DATA", Context.MODE_PRIVATE)
 
-    val navChannel = MutableStateFlow<String>("")
+    val navChannel = MutableSharedFlow<String>(extraBufferCapacity = 1)
     val TOKEN_LENGTH = 12;
 
     private val bleManager = BLEManager()
@@ -94,17 +98,35 @@ class PairDeviceViewModel(private val repository: Repository = DefaultRepository
 
     fun onPairWithDevice() {
         val token = generateRandomToken()
+        println(token)
         val encryptionKey = generateEncryptionKey()
+        val ivKey = generateIV()
 
         viewModelScope.launch(Dispatchers.IO) {
-            sendTokenToServer(token)
-            Thread.sleep(10)
-            saveDataInSharedPrefs(getDeviceKey(), encryptionKey)
-            sendMessageToDevice(ssid = ssid.value,
-                                password = password.value,
-                                token = token,
-                                hash = encryptionKey
-            )
+            val response = repository.generateToken(TokenData(token))
+            toastChannel.emit("Connecting with server...")
+            if(response.data == null) {
+                toastChannel.emit("Something went wrong")
+                navChannel.emit("BACK")
+                return@launch
+            } else {
+                if(response.code == 401)
+                    navChannel.emit("LOGOUT")
+                else {
+                    toastChannel.emit("Pairing with device...")
+                    val userId = response.data.userId
+                    Thread.sleep(10)
+                    saveDataInSharedPrefs(getDeviceKey() + "AESKEY", encryptionKey)
+                    saveDataInSharedPrefs(getDeviceKey() + "AESIV", ivKey)
+                    sendMessageToDevice(ssid = ssid.value,
+                        password = password.value,
+                        token = token,
+                        aesKey = encryptionKey,
+                        aesIV = ivKey,
+                        userId = userId,
+                    )
+                }
+            }
         }
     }
 
@@ -118,6 +140,11 @@ class PairDeviceViewModel(private val repository: Repository = DefaultRepository
         return encryptionManager.generateKey()
     }
 
+    private fun generateIV(): String {
+        val encryptionManager = EncryptionManager()
+        return encryptionManager.generateIV()
+    }
+
     private fun getDeviceKey(): String {
         return chosenDevice?.address?: ""
     }
@@ -128,17 +155,16 @@ class PairDeviceViewModel(private val repository: Repository = DefaultRepository
         editor.apply()
     }
 
-    private suspend fun sendTokenToServer(token: String) {
-        repository.generateToken(TokenData(token))
-    }
-
-    private suspend fun sendMessageToDevice(ssid: String, password: String, token: String, hash: String) {
+    private suspend fun sendMessageToDevice(ssid: String, password: String, token: String, aesKey: String, aesIV: String, userId: String) {
         if(chosenDevice != null)
             bleManager.sendMessageToDevice(advertisement = chosenDevice!!,
                 token = token,
                 ssid = ssid,
                 password = password,
-                hash = hash
+                aesIV = aesIV,
+                aesKey = aesKey,
+                userId = userId,
+
             )
     }
 }

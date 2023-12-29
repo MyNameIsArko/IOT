@@ -25,12 +25,17 @@ fun DeviceResponse.toDevice() = Device(
     mac = mac,
 )
 
-private fun getDeviceKey(deviceKey: String): String {
+private fun getAesKey(deviceKey: String): String {
     val sharedPreference =  ContextCatcher.getContext().getSharedPreferences("USER_DATA", Context.MODE_PRIVATE)
-    return sharedPreference.getString(deviceKey, "")?:""
+    return sharedPreference.getString(deviceKey+ "AESKEY", "")?:""
+}
+
+private fun getAesIV(deviceKey: String): String {
+    val sharedPreference =  ContextCatcher.getContext().getSharedPreferences("USER_DATA", Context.MODE_PRIVATE)
+    return sharedPreference.getString(deviceKey+ "AESIV", "")?:""
 }
 
 private fun decrypt(message: String, deviceKey: String): String {
     val encryptionManager = EncryptionManager()
-    return encryptionManager.decrypt(message, getDeviceKey(deviceKey))
+    return encryptionManager.decrypt(message, getAesKey(deviceKey), getAesIV(deviceKey))
 }

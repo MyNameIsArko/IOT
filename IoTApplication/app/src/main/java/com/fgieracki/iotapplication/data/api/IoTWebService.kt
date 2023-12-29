@@ -5,6 +5,7 @@ import com.fgieracki.iotapplication.data.api.model.LoginData
 import com.fgieracki.iotapplication.data.api.model.LoginResponse
 import com.fgieracki.iotapplication.data.api.model.StringResponse
 import com.fgieracki.iotapplication.data.api.model.TokenData
+import com.fgieracki.iotapplication.data.api.model.UserIdResponse
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -39,7 +40,7 @@ object IoTWebService {
 
         @POST("api/Device/token")
         suspend fun generateToken(@Header("Authorization") token: String,
-                                  @Body tokenData: TokenData): Response<StringResponse>
+                                  @Body tokenData: TokenData): Response<UserIdResponse>
 
     }
 }

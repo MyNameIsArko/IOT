@@ -6,6 +6,7 @@ import com.fgieracki.iotapplication.data.api.model.LoginData
 import com.fgieracki.iotapplication.data.api.model.LoginResponse
 import com.fgieracki.iotapplication.data.api.model.StringResponse
 import com.fgieracki.iotapplication.data.api.model.TokenData
+import com.fgieracki.iotapplication.data.api.model.UserIdResponse
 import com.fgieracki.iotapplication.data.api.model.toDevice
 import com.fgieracki.iotapplication.data.local.ContextCatcher
 import com.fgieracki.iotapplication.domain.model.Device
@@ -50,13 +51,9 @@ class DefaultRepository : Repository() {
         }
     }
 
-    override suspend fun generateToken(tokenData: TokenData): Resource<StringResponse> {
+    override suspend fun generateToken(tokenData: TokenData): Resource<UserIdResponse> {
         return safeApiCall{ api.generateToken(getToken(), tokenData) }
     }
-
-//    override suspend fun addDevice(ssid: String, psswd: String): Resource<String> {
-//        return safeApiCall{ deviceApi.addDevice(ssid, psswd, USER_TOKEN) }
-//    }
 
     override suspend fun deleteDevice(device: Device): Resource<Boolean> {
         TODO("Not yet implemented")

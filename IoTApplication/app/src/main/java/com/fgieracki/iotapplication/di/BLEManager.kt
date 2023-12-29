@@ -68,22 +68,21 @@ class BLEManager {
     suspend fun sendMessageToDevice(
         advertisement: AndroidAdvertisement,
         token: String,
-        hash: String,
+        aesKey: String,
+        aesIV: String,
+        userId: String,
         ssid: String,
         password: String,
     ) {
         val peripheral = scope
             .peripheral(advertisement = advertisement) {
                 onServicesDiscovered {
-                    requestMtu(1500)
+                    requestMtu(998)
                 }
             }
 
         peripheral.connect()
-        sleep(1000)
-//        peripheral.state.collect {
-//            println(it.toString())
-//        }
+        sleep(1500)
 
         val writeCharacteristics = peripheral.services?.firstNotNullOfOrNull {
             it.characteristics.firstOrNull {
@@ -107,38 +106,27 @@ class BLEManager {
         } ?: throw IllegalArgumentException("No read characteristics found")
 
         val textToSend =
-            "{\"ssid\":\"$ssid\"," +
+            "START{\"ssid\":\"$ssid\"," +
             "\"password\":\"$password\"," +
-            " \"token\":\"${token}\"," +
-            "\"hash\":$hash}"
+            "\"user_id\":\"$userId\"," +
+            "\"mac\":\"${advertisement.address}\"," +
+            "\"token\":\"${token}\"," +
+            "\"aes_key\":\"${aesKey}\"," +
+            "\"aes_iv\":\"$aesIV\"}END"
 
-        peripheral.write(
-            characteristic = writeCharacteristics,
-            "START".toByteArray(),
-        )
-        peripheral.write(
-            characteristic = writeCharacteristics,
-            textToSend.toByteArray(),
-        )
-        peripheral.write(
-            characteristic = writeCharacteristics,
-            "END".toByteArray(),
-        )
+        println("Sending: $textToSend")
+
+        for(i in 0..textToSend.length step 20) {
+            print("Sending: ")
+            println(textToSend.substring(i, (i + 20).coerceAtMost(textToSend.length)))
+            peripheral.write(
+                characteristic = writeCharacteristics,
+                textToSend.substring(i, (i + 20).coerceAtMost(textToSend.length)).toByteArray(),
+            )
+            sleep(100)
+        }
+
         println("Write success, waiting for disconnect")
-
-        /*        peripheral.state
-                    .onEach { println(it.toString()) }
-                    .filterIsInstance<State.Disconnected>()
-                    .timeout(10.seconds)
-                    .catch {
-                        if (it is TimeoutCancellationException) {
-                            throw BluetoothException.Timeout
-                        } else {
-                            throw it
-                            
-                        }
-                    }
-                    .first()*/
 
         val response =
             peripheral.read(readCharacteristics).also {
