@@ -6,6 +6,10 @@ log = ulogging.getLogger('CRYPTO')
 
 class Encryption :
     def __init__(self, key, iv):
+        if isinstance(key, str):
+            key = key.encode()
+        if isinstance(iv, str):
+            iv = iv.encode()
         self.key = key
         self.iv = iv
 
