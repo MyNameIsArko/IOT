@@ -1,11 +1,11 @@
 package com.fgieracki.iotapplication.domain.model
 
-import java.sql.Timestamp
+import java.util.Date
 
 data class Device(
     val name: String,
-    val lastTemperatureUpdateTimestamp: Timestamp,
-    val lastHumidityUpdateTimestamp: Timestamp,
+    val lastTemperatureUpdateTimestamp: Date,
+    val lastHumidityUpdateTimestamp: Date,
     val temperature: String,
     val humidity: String,
     val mac: String,

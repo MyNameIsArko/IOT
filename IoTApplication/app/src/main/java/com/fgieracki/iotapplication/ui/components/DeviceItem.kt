@@ -20,11 +20,14 @@ import com.fgieracki.iotapplication.ui.theme.IoTBlue
 @Composable
 fun DeviceItem(device: Device, deleteDevice: (Device) -> Unit = {}) {
     val menuExpanded = remember { mutableStateOf(false) }
+    val temperature = if(device.temperature == "") "N/A" else device.temperature
+    val humidity = if(device.humidity == "") "N/A" else device.humidity
+    val deviceName = if(device.name == "") device.mac else device.name
 
     ListItem(
-        headlineText = { Text(text = device.name) },
+        headlineText = { Text(text = deviceName) },
         overlineText = { Text(text = "Last update: " + device.lastTemperatureUpdateTimestamp.toString()) },
-        supportingText = { Text(text = "Temperature: " + device.temperature + ", humidity: " + device.humidity) },
+        supportingText = { Text(text = "Temperature: " + temperature + ", humidity: " + humidity) },
         trailingContent = {
             IconButton(
                 onClick = { menuExpanded.value = !menuExpanded.value }

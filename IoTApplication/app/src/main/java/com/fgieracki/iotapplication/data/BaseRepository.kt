@@ -1,5 +1,6 @@
 package com.fgieracki.iotapplication.data
 
+import android.util.Log
 import com.fgieracki.iotapplication.domain.model.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -11,7 +12,9 @@ abstract class BaseRepository {
     suspend fun <T> safeApiCall(apiToBeCalled: suspend () -> Response<T>): Resource<T> {
         return withContext(Dispatchers.IO) {
             try {
+                Log.d("safeApiCall", "Calling api: $apiToBeCalled")
                 val response: Response<T> = apiToBeCalled()
+                Log.d("safeApiCall", response.toString())
                 if (response.isSuccessful) {
                     Resource.Success(data = response.body()!!)
                 } else {
@@ -25,7 +28,7 @@ abstract class BaseRepository {
                 Resource.Error("Please check your network connection", code = 500)
             } catch (e: Exception) {
                 print(e)
-                Resource.Error(errorMessage = "Something went wrong", code = 500)
+                Resource.Error(errorMessage = "Something went wrong.", code = 500)
             }
         }
     }

@@ -6,6 +6,7 @@ import com.fgieracki.iotapplication.data.api.model.LoginResponse
 import com.fgieracki.iotapplication.data.api.model.StringResponse
 import com.fgieracki.iotapplication.data.api.model.TokenData
 import com.fgieracki.iotapplication.data.api.model.UserIdResponse
+import com.google.gson.GsonBuilder
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -22,9 +23,10 @@ object IoTWebService {
     }
 
     private val retrofit: Retrofit by lazy {
+        val gson = GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create()
         Retrofit.Builder()
             .baseUrl(SERVER_URL)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }
 
