@@ -10,10 +10,12 @@ log = ulogging.getLogger('WIFI')
 
 def connect_to_wifi(ssid, password):
     log.info('Connecting to the network')
+    log.info(f'SSID: {ssid}, Password: {password}')
+
     sta.connect(ssid, password)
     timer = 0
     while not sta.isconnected():
-        if timer > 10:
+        if timer > 60:
             log.warning("Wifi doesn't exists or bad credentials.")
             return False
         time.sleep(1)

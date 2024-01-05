@@ -24,7 +24,7 @@ class Broker:
     
     def connect(self):
         log.info('Trying to connect to MQTT broker')
-        client = MQTTClient(self.client_id, self.mqtt_ip, port=8883, user="devicePublisher", password="RVbySf#FV8*!xG4&o4j6")
+        client = MQTTClient(self.client_id, self.mqtt_ip, port=883, user="devicePublisher", password="RVbySf#FV8*!xG4&o4j6")
         try:
             client.connect()
             log.info(f'Connected to {self.mqtt_ip} MQTT broker.')
