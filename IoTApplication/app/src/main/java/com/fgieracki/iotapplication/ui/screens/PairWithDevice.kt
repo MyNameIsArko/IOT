@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.fgieracki.iotapplication.di.viewModels.PairDeviceViewModel
-import com.fgieracki.iotapplication.domain.model.BluetoothDevice
 import com.fgieracki.iotapplication.ui.components.AddDeviceAppBar
 import com.fgieracki.iotapplication.ui.components.AddDeviceDialog
 import com.fgieracki.iotapplication.ui.components.AndroidDeviceList
@@ -28,7 +27,6 @@ import kotlinx.coroutines.flow.collectLatest
 fun ScreenPairWithDevice(
     viewModel: PairDeviceViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
     onBackClick: () -> Unit = {},
-    onAddDevice: (BluetoothDevice) -> Unit = {},
     onLogout: () -> Unit = {}
 ) {
 

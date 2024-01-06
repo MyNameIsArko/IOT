@@ -5,15 +5,15 @@ import com.fgieracki.iotapplication.data.local.ContextCatcher
 import com.fgieracki.iotapplication.di.EncryptionManager
 import com.fgieracki.iotapplication.domain.model.Device
 import com.google.gson.annotations.SerializedName
-import java.sql.Timestamp
+import java.util.Date
 
 data class DeviceResponse(
-    @SerializedName("Name") val deviceName: String,
-    @SerializedName("LastTemperatureUpdate") val lastTemperatureUpdateTimestamp: Timestamp,
-    @SerializedName("LastHumidityUpdate") val lastHumidityUpdateTimestamp: Timestamp,
-    @SerializedName("Temperature") val temperature: String,
-    @SerializedName("Humidity") val humidity: String,
-    @SerializedName("Mac") val mac: String,
+    @SerializedName("mac") val mac: String,
+    @SerializedName("name") val deviceName: String,
+    @SerializedName("temperature") val temperature: String,
+    @SerializedName("humidity") val humidity: String,
+    @SerializedName("lastTemperatureUpdate") val lastTemperatureUpdateTimestamp: Date,
+    @SerializedName("lastHumidityUpdate") val lastHumidityUpdateTimestamp: Date,
 )
 
 fun DeviceResponse.toDevice() = Device(

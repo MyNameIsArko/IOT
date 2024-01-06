@@ -112,7 +112,7 @@ class BLEManager {
             "\"mac\":\"${advertisement.address}\"," +
             "\"token\":\"${token}\"," +
             "\"aes_key\":\"${aesKey}\"," +
-            "\"aes_iv\":\"$aesIV\"}END"
+            "\"aes_iv\":\"${aesIV}\"}END"
 
         println("Sending: $textToSend")
 

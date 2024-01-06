@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.flow
 
 class DefaultRepository : Repository() {
     private val api = IoTWebService.api
-//    private val deviceApi = IoTWebService.deviceApi
 
     private var USER_TOKEN = "Token"
     private val sharedPreference =  ContextCatcher.getContext().getSharedPreferences("USER_DATA", Context.MODE_PRIVATE)
@@ -31,12 +30,10 @@ class DefaultRepository : Repository() {
     }
 
     override suspend fun login(username: String, password: String): Resource<LoginResponse> {
-//        return api.login(LoginData(username, password))
         return safeApiCall{ api.login(LoginData(username, password)) }
     }
 
     override suspend fun register(username: String, password: String): Resource<StringResponse> {
-//        return api.register(LoginData(username, password))
         return safeApiCall{ api.register(LoginData(username, password)) }
     }
 
