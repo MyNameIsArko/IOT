@@ -58,8 +58,8 @@ class Broker:
                     humidity_txt = str(json_measurements["humidity"])
                     humidity_msg = self.encryption.encrypt(humidity_txt)
 
-                    temperature_encoded = ubinascii.b2a_base64(temperature_msg)
-                    humidity_encoded = ubinascii.b2a_base64(humidity_msg)
+                    temperature_encoded = ubinascii.a2b_base64(temperature_msg)
+                    humidity_encoded = ubinascii.a2b_base64(humidity_msg)
 
                     self.client.publish(self.temperature_topic, temperature_encoded)
                     self.client.publish(self.humidity_topic, humidity_encoded)
