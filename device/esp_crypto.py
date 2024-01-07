@@ -21,7 +21,10 @@ class Encryption:
 
     def pad(self, data):
         log.info("Padding text")
-        return data + b"\x00" * ((16 - (len(data) % 16)) % 16)
+        block_size = 16
+        padding_needed = block_size - len(data) % block_size
+        return data + bytes([padding_needed] * padding_needed)
+        # return data + b"\x00" * ((16 - (len(data) % 16)) % 16)
 
     def unpad(self, txt):
         log.info("Unpadding text")
