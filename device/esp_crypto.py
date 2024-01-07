@@ -1,4 +1,4 @@
-    import uos
+import uos
 from ucryptolib import aes
 import ulogging
 
