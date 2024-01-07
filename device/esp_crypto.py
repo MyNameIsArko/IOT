@@ -17,6 +17,7 @@ class Encryption:
             iv = iv.encode()
         self.key = key
         self.iv = iv
+        log.info(f"Encryption initialized. Key: {self.key}, IV: {self.iv}")
 
     def pad(self, data):
         log.info("Padding text")
