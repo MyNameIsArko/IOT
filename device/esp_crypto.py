@@ -18,16 +18,17 @@ class Encryption:
         self.key = key
         self.iv = iv
 
-    def pad(self, txt):
+    def pad(self, data):
         log.info("Padding text")
-        return txt + " " * (16 - len(txt) % 16)
+        return data + b"\x00" * ((16 - (len(data) % 16)) % 16)
 
     def unpad(self, txt):
         log.info("Unpadding text")
         return txt.strip()
 
     def encrypt(self, txt):
-        padded = self.pad(txt)
+        data = txt.encode()
+        padded = self.pad(data)
         log.info("Creating cipher")
         cipher = aes(self.key, 2, self.iv)
         log.info("Encrypting data")
