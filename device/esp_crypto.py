@@ -1,6 +1,7 @@
 import uos
 from ucryptolib import aes
 import ulogging
+import ubinascii
 
 log = ulogging.getLogger("CRYPTO")
 
@@ -36,7 +37,8 @@ class Encryption:
         log.info("Creating cipher")
         cipher = aes(self.key, 2, self.iv)
         log.info("Encrypting data")
-        return cipher.encrypt(padded)
+        encrypted = cipher.encrypt(padded)
+        return ubinascii.b2a_base64(encrypted).decode()
 
     def decrypt(self, data):
         log.info("Creating cipher")
