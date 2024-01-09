@@ -8,5 +8,5 @@ public interface ITokenRepository
     
     Task<bool> DoesTokenExist(string value, string userId);
 
-    Task<bool> RemoveToken(string value);
+    Task<Token?> RemoveToken(string value);
 }

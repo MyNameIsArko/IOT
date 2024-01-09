@@ -6,7 +6,7 @@ networks:
 
 services:
   httpserver:
-    image: nnatalia/iot:httpserver
+    image: httpserver
     depends_on:
       - serverdb
       - authdb
@@ -22,7 +22,7 @@ services:
       - dev
 
   mqttserver:
-    image: nnatalia/iot:mqttserver
+    image: mqttserver
     container_name: mqttserver
     build:
       context: ./MqttServer
@@ -33,7 +33,7 @@ services:
       - dev
 
   serverdb:
-    image: nnatalia/iot:postgres
+    image: postgres:latest
     container_name: serverdb
     environment:
       - 'POSTGRES_USER=postgres'
@@ -48,7 +48,7 @@ services:
       - dev
   
   authdb:
-    image: nnatalia/iot:postgres
+    image: postgres:latest
     container_name: authdb
     environment:
       - 'POSTGRES_USER=postgres'

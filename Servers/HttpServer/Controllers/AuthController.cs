@@ -1,7 +1,7 @@
 using HttpServer.Authentication;
 using HttpServer.Communication.Requests;
 using HttpServer.Communication.Responses;
-using HttpServer.Logger;
+using HttpServer.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,19 +15,19 @@ public class AuthController : Controller
     
     private readonly ITokenService _tokenService;
     
-    private readonly LoggerMock _logger;
+    private readonly IDeviceRepository _deviceRepository;
 
-    public AuthController(UserManager<IdentityUser> userManager, ITokenService tokenService, LoggerMock logger)
+    public AuthController(UserManager<IdentityUser> userManager, ITokenService tokenService, IDeviceRepository deviceRepository)
     {
         _userManager = userManager;
         _tokenService = tokenService;
-        _logger = logger;
+        _deviceRepository = deviceRepository;
     }
     
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterUserRequest request)
     {
-        _logger.WriteLogs("Register request received: " + request);
+        Console.WriteLine("Register request received: " + request);
         var identityUser = new IdentityUser
         {
             UserName = request.UserName
@@ -39,14 +39,14 @@ public class AuthController : Controller
             return BadRequest(new MessageResponse(string.Join("\n", registerResult.Errors.Select(e => e.Description))));
         }
         
-        _logger.WriteLogs("Sending response: " + "User was successfully created");
+        Console.WriteLine("Sending response: " + "User was successfully created");
         return Ok(new MessageResponse("User was successfully created"));
     }
     
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginUserRequest request)
     {
-        _logger.WriteLogs("Login request received: " + request);
+        Console.WriteLine("Login request received: " + request);
         var user = await _userManager.FindByNameAsync(request.UserName);
 
         if (user is null)
@@ -62,8 +62,16 @@ public class AuthController : Controller
         }
         
         var token = _tokenService.GenerateToken(user.Id);
+        var devices = await _deviceRepository.GetUserDevices(user.Id);
+        var devicesKeys = devices.Select(device => new LoginResponse.DeviceKey { Mac = device.Mac, Key = device.Key, IV = device.IV }).ToList();
+
+        var response = new LoginResponse
+        {
+            DevicesKeys = devicesKeys,
+            Token = token
+        };
         
-        _logger.WriteLogs("Sending response: " + token);
-        return Ok(new TokenResponse(token));
+        Console.WriteLine("Sending response: " + response);
+        return Ok(response);
     }
 }

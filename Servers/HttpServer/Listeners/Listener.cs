@@ -1,6 +1,5 @@
 ﻿using HttpServer.Configuration;
 using HttpServer.Data.Models;
-using HttpServer.Logger;
 using HttpServer.Repositories;
 using MQTTnet;
 using MQTTnet.Client;
@@ -16,8 +15,6 @@ public class Listener
     private readonly MqttOptions _mqttOptions;
 
     private readonly Device _device;
-    
-    private readonly LoggerMock _logger;
 
     private readonly IMqttClient _client;
 
@@ -29,7 +26,6 @@ public class Listener
         _topicDataRepository = serviceScope.ServiceProvider.GetRequiredService<ITopicDataRepository>();
         _mqttOptions = AppConfiguration.GetMqttOptions();
         _device = device;
-        _logger = serviceScope.ServiceProvider.GetRequiredService<LoggerMock>();
 
         try
         {
@@ -62,7 +58,7 @@ public class Listener
                     }
                     catch(Exception e)
                     {
-                        _logger.WriteLogs("Cannot connect mqtt client for listener: " + e.Message);
+                        Console.WriteLine("Cannot connect mqtt client for listener: " + e.Message);
                     }
                     finally
                     {
@@ -76,7 +72,7 @@ public class Listener
     {
         try
         {
-            _logger.WriteLogs($"Trying to connect client for device {_device.Mac} to server");
+            Console.WriteLine($"Trying to connect client for device {_device.Mac} to server");
             
             var mqttClientOptions = new MqttClientOptionsBuilder()
                 .WithClientId($"C#Client-{_device.Mac}")
@@ -89,11 +85,11 @@ public class Listener
             
             await _client.ConnectAsync(mqttClientOptions);
             
-            _logger.WriteLogs($"Client for device {_device.Mac} connected to server");
+            Console.WriteLine($"Client for device {_device.Mac} connected to server");
         }
         catch (Exception e)
         {
-            _logger.WriteLogs($"Client for device {_device.Mac} could not be connected. Error message: {e.Message}");
+            Console.WriteLine($"Client for device {_device.Mac} could not be connected. Error message: {e.Message}");
             return;
         }
 
@@ -105,13 +101,14 @@ public class Listener
 
     private async void HandleReceivingMessages(Topic topic)
     {
-        _logger.WriteLogs($"Client for device {_device.Mac} is trying to subscribe to topic {topic}");
+        Console.WriteLine($"Client for device {_device.Mac} is trying to subscribe to topic {topic}");
         
         var topicName = $"{_device.Mac}/{topic}";
 
         _client.ApplicationMessageReceivedAsync += delegate(MqttApplicationMessageReceivedEventArgs args)
         {
             var value = System.Text.Encoding.Default.GetString(args.ApplicationMessage.PayloadSegment);
+            //var value = args.ApplicationMessage.ConvertPayloadToString();
 
             if (topicName != args.ApplicationMessage.Topic) return Task.CompletedTask;
 

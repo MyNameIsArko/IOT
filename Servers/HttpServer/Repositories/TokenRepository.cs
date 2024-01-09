@@ -39,18 +39,18 @@ public class TokenRepository : ITokenRepository
         }
     }
 
-    public async Task<bool> RemoveToken(string value)
+    public async Task<Token?> RemoveToken(string value)
     {
         try
         {
-            var token = await _dbContext.Tokens.SingleOrDefaultAsync();
-            _dbContext.Tokens.Remove(token!);
+            var token = await _dbContext.Tokens.FirstOrDefaultAsync(token => token.Value == value);
+            _dbContext.Tokens.Remove(token);
             await _dbContext.SaveChangesAsync();
-            return true;
+            return token;
         }
         catch (Exception)
         {
-            return false;
+            return null;
         }
     }
 }

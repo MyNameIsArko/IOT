@@ -1,5 +1,4 @@
 ﻿using HttpServer.Data.Models;
-using HttpServer.Logger;
 using HttpServer.Repositories;
 
 namespace HttpServer.Listeners;
@@ -10,15 +9,12 @@ public class ListenersManager : IListenersManager
     
     private readonly IListenerFactory _listenerFactory;
     
-    private readonly LoggerMock _logger;
-
     private static readonly List<Listener> Listeners = new();
 
-    public ListenersManager(IDeviceRepository deviceRepository, IListenerFactory listenerFactory, LoggerMock logger)
+    public ListenersManager(IDeviceRepository deviceRepository, IListenerFactory listenerFactory)
     {
         _deviceRepository = deviceRepository;
         _listenerFactory = listenerFactory;
-        _logger = logger;
     }
 
     public async Task ConnectDevices()
@@ -33,7 +29,7 @@ public class ListenersManager : IListenersManager
             }
             catch (Exception e)
             { 
-                _logger.WriteLogs("Cannot create listener: " + e.Message);
+                Console.WriteLine("Cannot create listener: " + e.Message);
             }
         }
     }
@@ -60,7 +56,7 @@ public class ListenersManager : IListenersManager
         }
         catch (Exception e)
         {
-            _logger.WriteLogs("Cannot create listener: " + e.Message);
+            Console.WriteLine("Cannot create listener: " + e.Message);
             return false;
         }
     }
@@ -77,7 +73,7 @@ public class ListenersManager : IListenersManager
         }
         catch (Exception e)
         {
-            _logger.WriteLogs("Cannot disconnect listener: " + e.Message);
+            Console.WriteLine("Cannot disconnect listener: " + e.Message);
             return false;
         }
 
