@@ -8,7 +8,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.fgieracki.iotapplication.di.viewModels.NavbarViewModel
-import com.fgieracki.iotapplication.ui.screens.ScreenAddDevice
 import com.fgieracki.iotapplication.ui.screens.ScreenHome
 import com.fgieracki.iotapplication.ui.screens.ScreenLogin
 import com.fgieracki.iotapplication.ui.screens.ScreenPairWithDevice
@@ -49,15 +48,6 @@ fun Navigation(viewModel : NavbarViewModel = androidx.lifecycle.viewmodel.compos
         navController.popBackStack()
     }
 
-    fun navigateToAddDevice() {
-        navController.navigate("addDevice") {
-            launchSingleTop = true
-            popUpTo("addDeviceTutorial") {
-                inclusive = false
-            }
-        }
-    }
-
     fun navigateToPairWithDevice() {
         navController.navigate("pairWithDevice") {
             launchSingleTop = true
@@ -81,10 +71,6 @@ fun Navigation(viewModel : NavbarViewModel = androidx.lifecycle.viewmodel.compos
 
         composable("pairWithDevice") {
             ScreenPairWithDevice( onBackClick = { navigateBack() })
-        }
-
-        composable("addDevice") {
-            ScreenAddDevice( onBackClick = { navigateBack() })
         }
     }
 }
