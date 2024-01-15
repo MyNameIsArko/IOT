@@ -75,17 +75,19 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-using (var serviceScope = app.Services.CreateScope())
-{
-    var authDb = serviceScope.ServiceProvider.GetRequiredService<AuthDbContext>();
-    var serverDb = serviceScope.ServiceProvider.GetRequiredService<ServerDbContext>();
+var serviceScope = app.Services.CreateScope();
 
-    await authDb.Database.EnsureCreatedAsync();
-    await serverDb.Database.EnsureCreatedAsync();
-    
-    var listenersManager = serviceScope.ServiceProvider.GetRequiredService<IListenersManager>();
-    await listenersManager.ConnectDevices();
-}
+var authDb = serviceScope.ServiceProvider.GetRequiredService<AuthDbContext>();
+var serverDb = serviceScope.ServiceProvider.GetRequiredService<ServerDbContext>();
+
+await authDb.Database.EnsureCreatedAsync();
+await serverDb.Database.EnsureCreatedAsync();
+
+authDb.CheckDatabaseConnection();
+serverDb.CheckDatabaseConnection();
+
+var listenersManager = serviceScope.ServiceProvider.GetRequiredService<IListenersManager>();
+await listenersManager.ConnectDevices();
 
 app.MapControllers();
 
