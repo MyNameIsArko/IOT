@@ -70,3 +70,5 @@ class Broker:
                     last_message = time.time()
             except OSError:
                 log.warning("Failed to push data to MQTT broker. Reconnecting")
+                self.client = None
+                break
