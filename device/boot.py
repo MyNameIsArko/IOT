@@ -38,6 +38,15 @@ def get_config():
         return None
 
 
+async def reset_if_not_exists(api_client, mac):
+    while True:
+        await asyncio.sleep(60)
+        log.info("Checking if device is registered")
+        if not api_client.check_if_exists(mac):
+            log.info("Resetting device")
+            machine.reset()
+
+
 async def main():
     import esp_wifi
     import esp_bluetooth
@@ -63,7 +72,7 @@ async def main():
         log.info("Writing data to config.json")
         with open("config.json", "w") as file:
             file.write(data)
-        log.info("Trying with new config")
+        log.info("Trying witth new config")
         config = get_config()
         if config is not None:
             isconnected = esp_wifi.connect_to_wifi(config["ssid"], config["password"])
@@ -76,7 +85,10 @@ async def main():
     api_client = esp_request.APIClient()
     api_client.send_info(config["token"], config["user_id"], config["mac"])
 
-    log.info("Setup encryption")
+    log.info("Starting 'check if exist' task")
+    asyncio.create_task(reset_if_not_exists(api_client, config["mac"]))
+
+    log.info("Setup encrypion")
     encryption = esp_crypto.Encryption(config["aes_key"], config["aes_iv"])
 
     log.info("Getting sensor")
