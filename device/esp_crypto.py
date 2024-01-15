@@ -38,7 +38,7 @@ class Encryption:
         cipher = aes(self.key, 2, self.iv)
         log.info("Encrypting data")
         encrypted = cipher.encrypt(padded)
-        return ubinascii.b2a_base64(encrypted).decode()
+        return ubinascii.b2a_base64(encrypted)
 
     def decrypt(self, data):
         log.info("Creating cipher")

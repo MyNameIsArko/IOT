@@ -28,9 +28,9 @@ public static class Program
         var mqttClient = mqttFactory.CreateMqttClient();
         // Use builder classes where possible in this project.
         var mqttClientOptions = new MqttClientOptionsBuilder()
-            .WithTcpServer("srv3.enteam.pl", 8883)
+            .WithTcpServer("srv3.enteam.pl", 883)
             .WithCredentials("devicePublisher", "RVbySf#FV8*!xG4&o4j6")
-            .WithClientId("xlient")
+            .WithClientId("client")
             .Build();
         
 
@@ -58,6 +58,8 @@ public static class Program
 
             var messageBytes = Encoding.UTF8.GetBytes(message!);
             mqttClient.PublishBinaryAsync(topic, messageBytes);
+
+            // mqttClient.PublishStringAsync(topic, message);
             
             Console.WriteLine("Message sent. Continue or press Q to quit");
         } while (Console.ReadKey().Key != ConsoleKey.Q);

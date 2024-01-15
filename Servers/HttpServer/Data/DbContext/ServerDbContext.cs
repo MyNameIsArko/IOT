@@ -14,6 +14,27 @@ public class ServerDbContext : Microsoft.EntityFrameworkCore.DbContext
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
     }
+    
+    public async void CheckDatabaseConnection()
+    {
+        while (true)
+        {
+            await Task.Delay(1000);
+            if (!await Database.CanConnectAsync())
+            {
+                try
+                {
+                    Console.WriteLine("Database disconnected. Trying to reconnect...");
+                    await Database.OpenConnectionAsync();
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Cannot connect to DB");
+                    // ignored
+                }
+            }
+        }
+    }
 
     public DbSet<Device> Devices { get; set; }
     

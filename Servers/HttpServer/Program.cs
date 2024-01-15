@@ -3,7 +3,6 @@ using HttpServer.Authentication;
 using HttpServer.Configuration;
 using HttpServer.Data.DbContext;
 using HttpServer.Listeners;
-using HttpServer.Logger;
 using HttpServer.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -42,7 +41,6 @@ builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
 builder.Services.AddScoped<ITopicDataRepository, TopicDataRepository>();
 builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 builder.Services.AddScoped<IListenersManager, ListenersManager>();
-builder.Services.AddScoped<LoggerMock>();
 
 
 var signingKey = Encoding.UTF8.GetBytes(AppConfiguration.GetJwtOptions().EncryptionKey);
@@ -77,17 +75,19 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-using (var serviceScope = app.Services.CreateScope())
-{
-    var authDb = serviceScope.ServiceProvider.GetRequiredService<AuthDbContext>();
-    var serverDb = serviceScope.ServiceProvider.GetRequiredService<ServerDbContext>();
+var serviceScope = app.Services.CreateScope();
 
-    await authDb.Database.EnsureCreatedAsync();
-    await serverDb.Database.EnsureCreatedAsync();
-    
-    var listenersManager = serviceScope.ServiceProvider.GetRequiredService<IListenersManager>();
-    await listenersManager.ConnectDevices();
-}
+var authDb = serviceScope.ServiceProvider.GetRequiredService<AuthDbContext>();
+var serverDb = serviceScope.ServiceProvider.GetRequiredService<ServerDbContext>();
+
+await authDb.Database.EnsureCreatedAsync();
+await serverDb.Database.EnsureCreatedAsync();
+
+authDb.CheckDatabaseConnection();
+serverDb.CheckDatabaseConnection();
+
+var listenersManager = serviceScope.ServiceProvider.GetRequiredService<IListenersManager>();
+await listenersManager.ConnectDevices();
 
 app.MapControllers();
 
