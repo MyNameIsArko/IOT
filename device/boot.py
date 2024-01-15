@@ -83,7 +83,9 @@ async def main():
 
     log.info("Registering device")
     api_client = esp_request.APIClient()
-    api_client.send_info(config["token"], config["user_id"], config["mac"])
+    correct = api_client.send_info(config["token"], config["user_id"], config["mac"])
+    if not correct:
+        return
 
     log.info("Starting 'check if exist' task")
     asyncio.create_task(reset_if_not_exists(api_client, config["mac"]))
