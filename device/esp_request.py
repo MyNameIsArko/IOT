@@ -7,8 +7,8 @@ log = ulogging.getLogger("REQUEST")
 
 class APIClient:
     def __init__(self):
-        self.regiser_url = "http://srv3.enteam.pl:180/api/Device/register"
-        self.exist_url = "http://srv3.enteam.pl:180/api/Device/exists"
+        self.regiser_url = "https://srv9cf.enteam.pl:180/api/Device/register"
+        self.exist_url = "https://srv9cf.enteam.pl:180/api/Device/exists"
 
     def send_info(self, token, user_id, mac):
         headers = {"Authorization": "Bearer " + token}
