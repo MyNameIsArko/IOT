@@ -17,7 +17,7 @@ fun AndroidDeviceList(
 ) {
     if (devices.isEmpty()) {
         Text(
-            text = "Turn ON Location and Bluetooth to see devices.",
+            text = "Location or Bluetooth might be OFF or there are no devices in range.",
             style = MaterialTheme.typography.bodyLarge,
             color = Color.Red
         )

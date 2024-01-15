@@ -1,6 +1,7 @@
 package com.fgieracki.iotapplication.data.api
 
 import com.fgieracki.iotapplication.data.api.model.DeviceListResponse
+import com.fgieracki.iotapplication.data.api.model.DeviceMac
 import com.fgieracki.iotapplication.data.api.model.LoginData
 import com.fgieracki.iotapplication.data.api.model.LoginResponse
 import com.fgieracki.iotapplication.data.api.model.StringResponse
@@ -12,6 +13,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.HTTP
 import retrofit2.http.Header
 import retrofit2.http.POST
 
@@ -43,6 +45,11 @@ object IoTWebService {
         @POST("api/Device/token")
         suspend fun generateToken(@Header("Authorization") token: String,
                                   @Body tokenData: TokenData): Response<UserIdResponse>
+
+        @HTTP(method = "DELETE", path ="api/Device/remove", hasBody = true)
+        suspend fun deleteDevice(@Header("Authorization") token: String,
+                                 @Body deviceMac: DeviceMac): Response<StringResponse>
+
 
     }
 }

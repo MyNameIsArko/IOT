@@ -1,5 +1,6 @@
 package com.fgieracki.iotapplication.di
 
+import android.util.Log
 import java.security.InvalidKeyException
 import java.security.NoSuchAlgorithmException
 import java.util.Base64
@@ -15,26 +16,30 @@ class EncryptionManager {
 
 
     // ref: https://www.baeldung.com/java-aes-encryption-decryption
-    fun decrypt(cipherText: String, keyValue: String, ivValue: String): String {
+    fun decrypt(cipherTextInput: String, keyValue: String, ivValue: String): String {
         try {
+            val cipherText = cipherTextInput.replace("\n", "")
+            Log.d("EncryptionManager", "cipherText: $cipherText, keyValue: $keyValue, ivValue: $ivValue")
+            val msgBytes = Base64.getDecoder().decode(cipherText)
+
             val key = SecretKeySpec(keyValue.toByteArray(), "AES")
             val iv = IvParameterSpec(ivValue.toByteArray())
             val cipher = Cipher.getInstance(algorithm)
             cipher.init(Cipher.DECRYPT_MODE, key, iv)
-            val plainText = cipher.doFinal(Base64.getDecoder().decode(cipherText))
+            val plainText = cipher.doFinal(msgBytes)
             return String(plainText)
         } catch (ex: IllegalBlockSizeException) {
-        println(ex.message)
+        Log.e("Encryption Manager", "${ex.message}")
         } catch (ex: BadPaddingException) {
-            println(ex.message)
+            Log.e("Encryption Manager", "${ex.message}")
         } catch (ex: InvalidKeyException) {
-            println(ex.message)
+            Log.e("Encryption Manager", "${ex.message}")
         } catch (ex: NoSuchAlgorithmException) {
-            println(ex.message)
+            Log.e("Encryption Manager", "${ex.message}")
         } catch (ex: NoSuchPaddingException) {
-            println(ex.message)
+            Log.e("Encryption Manager", "${ex.message}")
         } catch (ex: Exception) {
-            println(ex.message)
+            Log.e("Encryption Manager", "${ex.message}")
         }
         return ""
     }

@@ -1,12 +1,14 @@
 package com.fgieracki.iotapplication.di.viewModels
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fgieracki.iotapplication.data.DefaultRepository
 import com.fgieracki.iotapplication.data.Repository
 import com.fgieracki.iotapplication.data.local.ContextCatcher
 import com.fgieracki.iotapplication.domain.model.LoginInputFields
+import com.fgieracki.iotapplication.domain.model.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,18 +58,23 @@ class SignInViewModel(private val repository: Repository = DefaultRepository()) 
     fun login() {
         viewModelScope.launch(Dispatchers.IO) {
             val response = repository.login(inputFields.value.username, inputFields.value.password)
-            if (response.data != null) {
+            if (response is Resource.Success && response.data != null) {
                 val editor = sharedPreference.edit()
-                print("RESPONSE: " + response.data)
+                Log.d("LoginView", "RESPONSE: " + response.data)
                 editor.putString("USER_TOKEN", "Bearer " + response.data.token)
+                response.data.deviceKeys.forEach() {
+                    saveDataInSharedPrefs(it.mac + "AESKEY", it.key)
+                    saveDataInSharedPrefs(it.mac + "AESIV", it.iv)
+                }
                 editor.commit()
+                clearInputs()
                 toastChannel.tryEmit("Login successful")
                 navChannel.tryEmit("Home")
             } else {
                 toastChannel.emit("Login failed: " + response.message)
             }
         }
-//        navChannel.tryEmit("Home")
+
     }
 
     fun register() {
@@ -135,6 +142,12 @@ class SignInViewModel(private val repository: Repository = DefaultRepository()) 
             return false
         }
         return true
+    }
+
+    private fun saveDataInSharedPrefs(key: String, value: String) {
+        val editor = sharedPreference.edit()
+        editor.putString(key, value)
+        editor.apply()
     }
 
 

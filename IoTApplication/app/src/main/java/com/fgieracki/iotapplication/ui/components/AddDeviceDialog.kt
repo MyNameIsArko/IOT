@@ -17,7 +17,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,13 +61,9 @@ fun AddDeviceDialog(
         ) {
             OutlinedTextField(
                 value = ssid,
+                label = { Text(text = "SSID") },
+                placeholder = { Text(text = "Network Name") },
                 onValueChange = { onSsidChange(it) },
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = IoTBlue,
-                    unfocusedBorderColor = IoTAmaranth,
-                    focusedLabelColor = IoTBlue,
-                    unfocusedLabelColor = IoTAmaranth,
-                ),
             )
             Spacer(modifier = Modifier.padding(8.dp))
 

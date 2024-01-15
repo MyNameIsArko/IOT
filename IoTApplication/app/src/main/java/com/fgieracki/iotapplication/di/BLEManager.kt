@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Intent
+import android.util.Log
 import com.fgieracki.iotapplication.data.local.ContextCatcher
 import com.juul.kable.AndroidAdvertisement
 import com.juul.kable.Filter
@@ -55,14 +56,14 @@ class BLEManager {
     fun getScannedDevices(): Flow<List<AndroidAdvertisement>> = scanner
         .advertisements
         .onStart {
-            println("Started searching")
+            Log.i("BLEManager","Started searching")
         }
         .map {
             advertisements[it.address] = it
             advertisements.values.toList()
         }
         .onCompletion { cause ->
-            println("Stopped searching: $cause")
+            Log.i("BLEManager","Stopped searching: $cause")
         }
 
     suspend fun sendMessageToDevice(
@@ -92,14 +93,14 @@ class BLEManager {
 
         val readCharacteristics = peripheral.services?.firstNotNullOfOrNull {
             it.characteristics.filter {
-                println(it.serviceUuid)
-                println(it.characteristicUuid)
+                Log.d("BLEManager","" + it.serviceUuid)
+                Log.d("BLEManager","" + it.characteristicUuid)
                 it.properties.read
             }.also {
                 it.forEach {
-                    println("Characteristics ${it.characteristicUuid}")
+                    Log.d("BLEManager", "Characteristics ${it.characteristicUuid}")
                     it.descriptors.forEach {
-                        println("Descriptor ${it.descriptorUuid}")
+                        Log.d("BLEManager", "Descriptor ${it.descriptorUuid}")
                     }
                 }
             }.getOrNull(0)
@@ -114,11 +115,11 @@ class BLEManager {
             "\"aes_key\":\"${aesKey}\"," +
             "\"aes_iv\":\"${aesIV}\"}END"
 
-        println("Sending: $textToSend")
+        Log.d("BLEManager", "Sending: $textToSend")
 
         for(i in 0..textToSend.length step 20) {
-            print("Sending: ")
-            println(textToSend.substring(i, (i + 20).coerceAtMost(textToSend.length)))
+            Log.d("BLEManager", "Sending: ")
+            Log.d("BLEManager", textToSend.substring(i, (i + 20).coerceAtMost(textToSend.length)))
             peripheral.write(
                 characteristic = writeCharacteristics,
                 textToSend.substring(i, (i + 20).coerceAtMost(textToSend.length)).toByteArray(),
@@ -126,22 +127,17 @@ class BLEManager {
             sleep(100)
         }
 
-        println("Write success, waiting for disconnect")
+        Log.i("BLEManager", "Write success, waiting for disconnect")
 
         val response =
             peripheral.read(readCharacteristics).also {
                 it.forEach {
-                    print(it)
-                    print(" ")
+                    Log.d("BLEManager", "$it")
                 }
-            }.decodeToString().also(::println)
+            }.decodeToString()
 
-        println("Wybrałem ${readCharacteristics.characteristicUuid}")
-
-        println("Response: $response")
-        /*if (response != "OK") {
-            throw BluetoothException.Other("Not ok")
-        }*/
+        Log.d("BLEManager","Use ${readCharacteristics.characteristicUuid}")
+        Log.d("BLEManager","Response: $response")
         peripheral.disconnect()
     }
 

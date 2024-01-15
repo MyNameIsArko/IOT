@@ -12,7 +12,6 @@ abstract class Repository : BaseRepository() {
     abstract suspend fun login(username: String, password: String): Resource<LoginResponse>
     abstract suspend fun register(username: String, password: String): Resource<StringResponse>
     abstract suspend fun getDevices(): Flow<Resource<List<Device>>>
-    abstract suspend fun deleteDevice(device: Device): Resource<Boolean>
-    abstract suspend fun updateDevice(device: Device): Resource<Boolean>
+    abstract suspend fun deleteDevice(device: Device): Resource<StringResponse>
     abstract suspend fun generateToken(tokenData: TokenData): Resource<UserIdResponse>
 }

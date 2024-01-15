@@ -4,9 +4,11 @@ import android.util.Log
 import com.fgieracki.iotapplication.domain.model.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import retrofit2.HttpException
 import retrofit2.Response
 import java.io.IOException
+
 
 abstract class BaseRepository {
     suspend fun <T> safeApiCall(apiToBeCalled: suspend () -> Response<T>): Resource<T> {
@@ -14,29 +16,26 @@ abstract class BaseRepository {
             try {
                 Log.d("safeApiCall", "Calling api: $apiToBeCalled")
                 val response: Response<T> = apiToBeCalled()
-                Log.d("safeApiCall", response.toString())
+                Log.i("safeApiCall", response.toString())
                 if (response.isSuccessful) {
                     Resource.Success(data = response.body()!!)
                 } else {
-                    print(response)
-                    Resource.Error(errorMessage = "Something went wrong: ${response.message()}", code = response.code())
+                    val jObjError = JSONObject(
+                        response.errorBody()!!.string()
+                    )
+                    Log.e("SafeApiCall", "Error: ${jObjError.getString("message")}")
+
+                    Resource.Error(errorMessage = jObjError.getString("message"), code = response.code())
                 }
             } catch (e: HttpException) {
                 Resource.Error(errorMessage = e.message ?: "Something went wrong", code = e.code())
             } catch (e: IOException) {
-                print(e)
+                Log.e("safeApiCall", "IOException: ${e.message}")
                 Resource.Error("Please check your network connection", code = 500)
             } catch (e: Exception) {
-                print(e)
+                Log.e("safeApiCall", "Exception: ${e.message}")
                 Resource.Error(errorMessage = "Something went wrong.", code = 500)
             }
         }
     }
-
-//    suspend fun login(username: String, password: String): Response<LoginResponse>
-//    suspend fun register(username: String, password: String): Response<StringResponse>
-//    fun getDevices(): Flow<List<Device>>
-//    suspend fun addDevice(device: Device): Boolean
-//    suspend fun deleteDevice(device: Device): Boolean
-//    suspend fun updateDevice(device: Device): Boolean
 }

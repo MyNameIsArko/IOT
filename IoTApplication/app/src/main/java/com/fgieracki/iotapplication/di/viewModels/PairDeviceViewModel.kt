@@ -3,6 +3,7 @@ package com.fgieracki.iotapplication.di.viewModels
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +15,7 @@ import com.fgieracki.iotapplication.data.local.ContextCatcher
 import com.fgieracki.iotapplication.di.BLEManager
 import com.fgieracki.iotapplication.di.EncryptionManager
 import com.fgieracki.iotapplication.di.TokenGenerator
+import com.fgieracki.iotapplication.domain.model.Resource
 import com.juul.kable.AndroidAdvertisement
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -98,34 +100,52 @@ class PairDeviceViewModel(private val repository: Repository = DefaultRepository
 
     fun onPairWithDevice() {
         val token = generateRandomToken()
-        println(token)
+        Log.d("PairDeviceViewModel", "Generated token: $token")
         val encryptionKey = generateEncryptionKey()
         val ivKey = generateIV()
 
         viewModelScope.launch(Dispatchers.IO) {
-            val response = repository.generateToken(TokenData(token))
-            toastChannel.emit("Connecting with server...")
-            if(response.data == null) {
-                toastChannel.emit("Something went wrong")
-                navChannel.emit("BACK")
-                return@launch
-            } else {
-                if(response.code == 401)
-                    navChannel.emit("LOGOUT")
-                else {
+            try {
+                val response = repository.generateToken(TokenData(token, encryptionKey, ivKey))
+                toastChannel.emit("Connecting with server...")
+                if (response is Resource.Error) {
+                    if (response.code == 401)
+                        navChannel.emit("LOGOUT")
+                    else {
+                        toastChannel.emit("Something went wrong")
+                        navChannel.emit("BACK")
+                        return@launch
+                    }
+                } else if (response is Resource.Success && response.data != null) {
                     toastChannel.emit("Pairing with device...")
-                    val userId = response.data.userId
+                    val userId = response.data!!.userId
                     Thread.sleep(10)
                     saveDataInSharedPrefs(getDeviceKey() + "AESKEY", encryptionKey)
+                    Log.d(
+                        "PairDeviceViewModel",
+                        "Generated deviceKey:  " + getDeviceKey() + "AESKEY"
+                    )
                     saveDataInSharedPrefs(getDeviceKey() + "AESIV", ivKey)
-                    sendMessageToDevice(ssid = ssid.value,
+                    sendMessageToDevice(
+                        ssid = ssid.value,
                         password = password.value,
                         token = token,
                         aesKey = encryptionKey,
                         aesIV = ivKey,
                         userId = userId,
                     )
+                    Thread.sleep(1000)
+                    toastChannel.emit("Added device successfully")
+                    navChannel.emit("BACK")
+                } else {
+                    toastChannel.emit("Something went wrong")
+                    navChannel.emit("BACK")
+                    return@launch
                 }
+            } catch (e: Exception) {
+                toastChannel.emit("Something went wrong")
+                navChannel.emit("BACK")
+                return@launch
             }
         }
     }

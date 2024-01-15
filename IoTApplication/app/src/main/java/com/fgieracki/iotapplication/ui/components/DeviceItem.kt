@@ -27,7 +27,8 @@ fun DeviceItem(device: Device, deleteDevice: (Device) -> Unit = {}) {
     ListItem(
         headlineText = { Text(text = deviceName) },
         overlineText = { Text(text = "Last update: " + device.lastTemperatureUpdateTimestamp.toString()) },
-        supportingText = { Text(text = "Temperature: $temperature, humidity: $humidity") },
+        supportingText = { Text(text = "Temperature: $temperature")
+            Text(text = "Humidity: $humidity%") },
         trailingContent = {
             IconButton(
                 onClick = { menuExpanded.value = !menuExpanded.value }

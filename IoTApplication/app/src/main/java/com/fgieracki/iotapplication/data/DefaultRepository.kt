@@ -2,6 +2,7 @@ package com.fgieracki.iotapplication.data
 
 import android.content.Context
 import com.fgieracki.iotapplication.data.api.IoTWebService
+import com.fgieracki.iotapplication.data.api.model.DeviceMac
 import com.fgieracki.iotapplication.data.api.model.LoginData
 import com.fgieracki.iotapplication.data.api.model.LoginResponse
 import com.fgieracki.iotapplication.data.api.model.StringResponse
@@ -52,12 +53,9 @@ class DefaultRepository : Repository() {
         return safeApiCall{ api.generateToken(getToken(), tokenData) }
     }
 
-    override suspend fun deleteDevice(device: Device): Resource<Boolean> {
-        TODO("Not yet implemented")
+    override suspend fun deleteDevice(device: Device): Resource<StringResponse> {
+        return safeApiCall { api.deleteDevice(getToken(), DeviceMac(device.mac)) }
     }
 
-    override suspend fun updateDevice(device: Device): Resource<Boolean> {
-        TODO("Not yet implemented")
-    }
 
 }
