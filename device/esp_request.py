@@ -38,7 +38,7 @@ class APIClient:
                 log.warning("Device does not exist")
                 return False
             else:
-                log.waring("Error from server: " + r.text)
+                log.waring("Unknown code from server: " + r.text)
                 return False
         except OSError:
             log.error("Error while sending 'if exists' request")
