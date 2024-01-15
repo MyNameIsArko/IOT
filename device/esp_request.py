@@ -21,7 +21,7 @@ class APIClient:
                 log.info("Device registered")
                 return True
             else:
-                log.error(r.text)
+                log.warning(r.text)
                 return False
         except OSError:
             log.error("Error while sending 'register' request")
@@ -35,7 +35,7 @@ class APIClient:
                 log.info("Device exists")
                 return True
             elif r.status_code == 404:
-                log.info("Device does not exist")
+                log.warning("Device does not exist")
                 return False
             else:
                 log.waring("Error from server: " + r.text)
