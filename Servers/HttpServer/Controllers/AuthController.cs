@@ -36,6 +36,7 @@ public class AuthController : Controller
         var registerResult = await _userManager.CreateAsync(identityUser, request.Password);
         if (!registerResult.Succeeded)
         {
+            Console.WriteLine("Sending response: " + string.Join("\n", registerResult.Errors.Select(e => e.Description)));
             return BadRequest(new MessageResponse(string.Join("\n", registerResult.Errors.Select(e => e.Description))));
         }
         
@@ -47,17 +48,40 @@ public class AuthController : Controller
     public async Task<IActionResult> Login([FromBody] LoginUserRequest request)
     {
         Console.WriteLine("Login request received: " + request);
-        var user = await _userManager.FindByNameAsync(request.UserName);
+        
+        IdentityUser? user;
+        try
+        {
+            user = await _userManager.FindByNameAsync(request.UserName);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            Console.WriteLine("Sending response: \"Cannot check user\"");
+            return Unauthorized(new MessageResponse("Cannot check user"));
+        }
 
         if (user is null)
         {
+            Console.WriteLine("Sending response: \"User does not exist\"");
             return Unauthorized(new MessageResponse("User does not exist"));
         }
-        
-        var result = await _userManager.CheckPasswordAsync(user, request.Password);
+
+        bool result;
+        try
+        {
+            result = await _userManager.CheckPasswordAsync(user, request.Password);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            Console.WriteLine("Sending response: \"Cannot check password\"");
+            return Unauthorized(new MessageResponse("Cannot check password"));
+        }
 
         if (!result)
         {
+            Console.WriteLine("Sending response: \"Incorrect password\"");
             return Unauthorized(new MessageResponse("Incorrect password"));
         }
         

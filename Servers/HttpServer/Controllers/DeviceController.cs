@@ -47,8 +47,10 @@ public class DeviceController : Controller
     public async Task<IActionResult> Register([FromBody] RegisterDeviceRequest request)
     {
         Console.WriteLine("Register device request received: " + request);
+        
         if (!HttpContext.Request.Headers.TryGetValue("Authorization", out var authHeader) || !authHeader.ToString().StartsWith("Bearer "))
         {
+            Console.WriteLine("Sending response: " + "No token provided");
             return Unauthorized("No token provided");
         }
 
@@ -56,6 +58,7 @@ public class DeviceController : Controller
 
         if (!await _tokenRepository.DoesTokenExist(token, request.UserId) || await _tokenRepository.RemoveToken(token) is not { } deviceToken)
         {
+            Console.WriteLine("Sending response: " + "Unknown token");
             return Unauthorized("Unknown token");
         }
 
@@ -64,6 +67,7 @@ public class DeviceController : Controller
             var result = await RemoveDevice(deviceEntity);
             if (!result)
             {
+                Console.WriteLine("Sending response: " + "Device is already registered and could not be removed");
                 return BadRequest("Device is already registered and could not be removed");
             }
         }
@@ -81,6 +85,7 @@ public class DeviceController : Controller
 
         if (!registrationResult)
         {
+            Console.WriteLine("Sending response: " + "The device could not be registered");
             return BadRequest("The device could not be registered");
         }
         
@@ -88,6 +93,7 @@ public class DeviceController : Controller
 
         if (!listenerAdded)
         {
+            Console.WriteLine("Sending response: " + "The device could not be registered (mqtt connection problem)");
             return BadRequest("The device could not be registered (mqtt connection problem)");
         }
         
@@ -99,26 +105,31 @@ public class DeviceController : Controller
     public async Task<IActionResult> UpdateName([FromBody] UpdateNameRequest request)
     {
         Console.WriteLine("Update name request received: " + request);
+        
         var user = await GetUserFromToken(HttpContext.Request.Headers);
         if (user is null)
         {
+            Console.WriteLine("Sending response: " + "User does not exist");
             return Unauthorized(new MessageResponse("User does not exist"));
         }
         
         var device = await _deviceRepository.GetDevice(request.Mac);
         if (device is null)
         {
+            Console.WriteLine("Sending response: " + "The device does not exist");
             return BadRequest(new MessageResponse("The device does not exist"));
         }
 
         if (!device.UserId.Equals(user.Id))
         {
+            Console.WriteLine("Sending response: " + $"User: {user.UserName} is not the owner of device with mac: {request.Mac}");
             return Unauthorized(new MessageResponse($"User: {user.UserName} is not the owner of device with mac: {request.Mac}"));
         }
 
         var result = await _deviceRepository.UpdateDeviceName(device.DeviceId, request.Name);
         if (!result)
         {
+            Console.WriteLine("Sending response: " + "Could not change device name");
             return BadRequest(new MessageResponse("Could not change device name"));
         }
 
@@ -130,26 +141,31 @@ public class DeviceController : Controller
     public async Task<IActionResult> Remove([FromBody] RemoveDeviceRequest request)
     {
         Console.WriteLine("Remove request received: " + request);
+        
         var user = await GetUserFromToken(HttpContext.Request.Headers);
         if (user is null)
         {
+            Console.WriteLine("Sending response: " + "User does not exist");
             return Unauthorized(new MessageResponse("User does not exist"));
         }
 
         var device = await _deviceRepository.GetDevice(request.Mac);
         if (device is null)
         {
+            Console.WriteLine("Sending response: " + "The device does not exist");
             return BadRequest(new MessageResponse("The device does not exist"));
         }
 
         if (!device.UserId.Equals(user.Id))
         {
+            Console.WriteLine("Sending response: " + $"User: {user.UserName} is not the owner of device with mac: {request.Mac}");
             return Unauthorized(new MessageResponse($"User: {user.UserName} is not the owner of device with mac: {request.Mac}"));
         }
 
         var result = await RemoveDevice(device);
         if (!result)
         {
+            Console.WriteLine("Sending response: " + "Device could not be removed");
             return BadRequest(new MessageResponse("Device could not be removed"));
         }
 
@@ -161,9 +177,11 @@ public class DeviceController : Controller
     public async Task<ActionResult<IEnumerable<Device>>> ListDevices()
     {
         Console.WriteLine("List request received");
+        
         var user = await GetUserFromToken(HttpContext.Request.Headers);
         if (user is null)
         {
+            Console.WriteLine("Sending response: " + "User does not exist");
             return Unauthorized(new MessageResponse("User does not exist"));
         }
 
@@ -171,6 +189,7 @@ public class DeviceController : Controller
         
         if (devices.IsNullOrEmpty())
         {
+            Console.WriteLine("Sending response: " + "User does not have any devices");
             return Ok(new DeviceListResponse(new List<DeviceResponse>()));
         }
 
@@ -198,9 +217,11 @@ public class DeviceController : Controller
     public async Task<ActionResult<string>> AddToken([FromBody] AddTokenRequest request)
     {
         Console.WriteLine("Token request received: " + request);
+        
         var user = await GetUserFromToken(HttpContext.Request.Headers);
         if (user is null)
         {
+            Console.WriteLine("Sending response: " + "User does not exist");
             return Unauthorized(new MessageResponse("User does not exist"));
         }
 
@@ -219,6 +240,7 @@ public class DeviceController : Controller
             return Ok(new UserIdResponse(user.Id));
         }
         
+        Console.WriteLine("Sending response: " + "Token could not be added");
         return BadRequest(new MessageResponse("Token could not be added"));
     }
     
@@ -226,11 +248,15 @@ public class DeviceController : Controller
     [HttpGet("exists")]
     public async Task<ActionResult<string>> DoesDeviceExist([FromBody] CheckDeviceRequest request)
     {
+        Console.WriteLine("Check device request received: " + request);
+        
         if (await _deviceRepository.GetDevice(request.Mac) is null)
         {
+            Console.WriteLine($"Sending response: Device with Mac {request.Mac} does not exist in the database"); 
             return NotFound($"Device with Mac {request.Mac} does not exist in the database");
         }
 
+        Console.WriteLine($"Sending response: Device with Mac {request.Mac} exists in the database");
         return Ok($"Device with Mac {request.Mac} exists in the database");
     }
 
