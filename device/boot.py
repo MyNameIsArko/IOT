@@ -44,40 +44,33 @@ async def main():
 
     isconnected = False
 
-    config = get_config()
-    if config is not None:
-        isconnected = esp_wifi.connect_to_wifi(config["ssid"], config["password"])
+    log.info("Removing config.json")
+    try:
+        os.remove("config.json")
+    except OSError:
+        log.warning("No config.json file found")
 
-    if not isconnected:
-        log.info("Removing config.json")
-        try:
-            os.remove("config.json")
-        except OSError:
-            log.warning("No config.json file found")
+    log.info("Starting bluetooth configuration")
 
-        log.info("Starting bluetooth configuration")
+    connection = None
+    characteristic = None
 
-        connection = None
-        characteristic = None
+    while not isconnected:
+        if connection is None:
+            characteristic = esp_bluetooth.get_characteristic()
+            connection = await esp_bluetooth.discover_bluetooth(characteristic)
+        data = await esp_bluetooth.read_data(characteristic)
+        log.info("Writing data to config.json")
+        with open("config.json", "w") as file:
+            file.write(data)
+        log.info("Trying with new config")
+        config = get_config()
+        if config is not None:
+            isconnected = esp_wifi.connect_to_wifi(config["ssid"], config["password"])
 
-        while not isconnected:
-            if connection is None:
-                characteristic = esp_bluetooth.get_characteristic()
-                connection = await esp_bluetooth.discover_bluetooth(characteristic)
-            data = await esp_bluetooth.read_data(characteristic)
-            log.info("Writing data to config.json")
-            with open("config.json", "w") as file:
-                file.write(data)
-            log.info("Trying with new config")
-            config = get_config()
-            if config is not None:
-                isconnected = esp_wifi.connect_to_wifi(
-                    config["ssid"], config["password"]
-                )
-
-        if connection is not None:
-            esp_bluetooth.write_data(characteristic, "CONNECTED")
-            esp_bluetooth.disconnect_connection(connection)
+    if connection is not None:
+        esp_bluetooth.write_data(characteristic, "CONNECTED")
+        esp_bluetooth.disconnect_connection(connection)
 
     log.info("Registering device")
     api_client = esp_request.APIClient()
