@@ -39,7 +39,7 @@ class APIClient:
                 return False
             else:
                 log.waring("Unknown code from server: " + r.text)
-                return True  # We return true as we don't want to reset device when server is down
+                return False
         except OSError:
             log.error("Error while sending 'if exists' request")
-            return False
+            return True  # We return true as we don't want to reset device when server is down
