@@ -197,8 +197,9 @@ class PairDeviceViewModel(private val repository: Repository = DefaultRepository
     }
 
     private suspend fun sendMessageToDevice(ssid: String, password: String, token: String, aesKey: String, aesIV: String, userId: String) {
-        if(chosenDevice != null)
-            bleManager.sendMessageToDevice(advertisement = chosenDevice!!,
+        if (chosenDevice != null)
+            bleManager.sendMessageToDevice(
+                advertisement = chosenDevice!!,
                 token = token,
                 ssid = ssid,
                 password = password,
@@ -206,8 +207,7 @@ class PairDeviceViewModel(private val repository: Repository = DefaultRepository
                 aesKey = aesKey,
                 userId = userId,
 
-            )
-    } else {
-        Log.d("PairDeviceViewModel", "chosenDevice is null")
+                )
+        else Log.d("PairDeviceViewModel", "chosenDevice is null")
     }
 }
