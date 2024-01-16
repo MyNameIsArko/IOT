@@ -4,19 +4,23 @@ import ulogging
 
 # Set up as wifi
 sta = network.WLAN(network.STA_IF)
-sta.active(True)
 
 log = ulogging.getLogger("WIFI")
 
 
-def connect_to_wifi(ssid, password):
+async def connect_to_wifi(ssid, password):
     log.info("Connecting to the network")
+    sta.active(True)
+    time.sleep(1)
+    log.info(f"'{ssid}', '{password}'")
     sta.connect(ssid, password)
     timer = 0
     while not sta.isconnected():
         if timer > 10:
             log.warning("Wifi doesn't exists or bad credentials.")
             sta.disconnect()
+            sta.active(False)
+            time.sleep(1)
             return False
         time.sleep(1)
         timer += 1
@@ -25,7 +29,3 @@ def connect_to_wifi(ssid, password):
         log.info(f"Network config: {sta.ifconfig()}")
         return True
     return False
-
-
-def check_if_connected():
-    return sta.isconnected()

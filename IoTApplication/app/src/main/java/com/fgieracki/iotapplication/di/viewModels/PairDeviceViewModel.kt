@@ -119,6 +119,9 @@ class PairDeviceViewModel(private val repository: Repository = DefaultRepository
                 } else if (response is Resource.Success && response.data != null) {
                     toastChannel.emit("Pairing with device...")
                     val userId = response.data!!.userId
+                    val initDevicesCount = repository.getDevicesCount().data ?: 0
+                    Log.i("PairDeviceViewModel", "initDevicesCount: $initDevicesCount")
+
                     Thread.sleep(10)
                     saveDataInSharedPrefs(getDeviceKey() + "AESKEY", encryptionKey)
                     Log.d(
@@ -126,6 +129,8 @@ class PairDeviceViewModel(private val repository: Repository = DefaultRepository
                         "Generated deviceKey:  " + getDeviceKey() + "AESKEY"
                     )
                     saveDataInSharedPrefs(getDeviceKey() + "AESIV", ivKey)
+
+
                     sendMessageToDevice(
                         ssid = ssid.value,
                         password = password.value,
@@ -134,9 +139,25 @@ class PairDeviceViewModel(private val repository: Repository = DefaultRepository
                         aesIV = ivKey,
                         userId = userId,
                     )
-                    Thread.sleep(1000)
-                    toastChannel.emit("Added device successfully")
-                    navChannel.emit("BACK")
+                    for(i in 1..20) {
+                        Thread.sleep(1000)
+                        if (repository.getDevicesCount().data ?: 0 > initDevicesCount) {
+                            toastChannel.emit("Added device successfully")
+                            navChannel.emit("BACK")
+                            return@launch
+                        }
+                    }
+//                    val finalDevicesCount = repository.getDevicesCount().data ?: 0
+//                    Log.i("PairDeviceViewModel", "finalDevicesCount: $finalDevicesCount")
+
+//                    if (initDevicesCount == finalDevicesCount) {
+                        toastChannel.emit("Something went wrong")
+                        navChannel.emit("BACK")
+                        return@launch
+//                    } else {
+//                        toastChannel.emit("Added device successfully")
+//                        navChannel.emit("BACK")
+//                    }
                 } else {
                     toastChannel.emit("Something went wrong")
                     navChannel.emit("BACK")
@@ -176,8 +197,9 @@ class PairDeviceViewModel(private val repository: Repository = DefaultRepository
     }
 
     private suspend fun sendMessageToDevice(ssid: String, password: String, token: String, aesKey: String, aesIV: String, userId: String) {
-        if(chosenDevice != null)
-            bleManager.sendMessageToDevice(advertisement = chosenDevice!!,
+        if (chosenDevice != null)
+            bleManager.sendMessageToDevice(
+                advertisement = chosenDevice!!,
                 token = token,
                 ssid = ssid,
                 password = password,
@@ -185,6 +207,7 @@ class PairDeviceViewModel(private val repository: Repository = DefaultRepository
                 aesKey = aesKey,
                 userId = userId,
 
-            )
+                )
+        else Log.d("PairDeviceViewModel", "chosenDevice is null")
     }
 }

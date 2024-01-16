@@ -14,4 +14,5 @@ abstract class Repository : BaseRepository() {
     abstract suspend fun getDevices(): Flow<Resource<List<Device>>>
     abstract suspend fun deleteDevice(device: Device): Resource<StringResponse>
     abstract suspend fun generateToken(tokenData: TokenData): Resource<UserIdResponse>
+    abstract suspend fun getDevicesCount(): Resource<Long>
 }
