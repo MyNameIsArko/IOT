@@ -39,7 +39,7 @@ public class Listener
 
     public bool IsListeningToDevice(Device device)
     {
-        return device.DeviceId == _device.DeviceId;
+        return device.Id == _device.Id;
     }
 
     public void StartListening()
@@ -115,7 +115,8 @@ public class Listener
             var topicData = new TopicData
             {
                 Topic = topic,
-                DeviceId = _device.DeviceId,
+                DeviceId = _device.Id,
+                Device = _device,
                 Data = value,
                 CreatedAt = DateTime.Now
             };

@@ -1,8 +1,11 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace HttpServer.Data.Models;
 
 public class Device
 {
-    public int DeviceId { get; set; }
+    [Key]
+    public int Id { get; set; }
 
     public string Name { get; set; } = string.Empty;
         
@@ -15,4 +18,6 @@ public class Device
     public string Key { get; set; }
     
     public string IV { get; set; }
+    
+    public ICollection<TopicData> TopicData { get; set; } = new List<TopicData>();
 }

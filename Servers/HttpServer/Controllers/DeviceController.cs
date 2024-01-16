@@ -126,7 +126,7 @@ public class DeviceController : Controller
             return Unauthorized(new MessageResponse($"User: {user.UserName} is not the owner of device with mac: {request.Mac}"));
         }
 
-        var result = await _deviceRepository.UpdateDeviceName(device.DeviceId, request.Name);
+        var result = await _deviceRepository.UpdateDeviceName(device.Id, request.Name);
         if (!result)
         {
             Console.WriteLine("Sending response: " + "Could not change device name");
@@ -196,8 +196,8 @@ public class DeviceController : Controller
         List<DeviceResponse> response = new();
         foreach (var device in devices)
         {
-            var temperature = await _topicDataRepository.GetLastDataUpdate(device.DeviceId, Topic.Temperature);
-            var humidity = await _topicDataRepository.GetLastDataUpdate(device.DeviceId, Topic.Humidity);
+            var temperature = await _topicDataRepository.GetLastDataUpdate(device.Id, Topic.Temperature);
+            var humidity = await _topicDataRepository.GetLastDataUpdate(device.Id, Topic.Humidity);
             response.Add(new DeviceResponse
             {
                 Mac = device.Mac,

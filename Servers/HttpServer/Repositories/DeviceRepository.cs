@@ -31,7 +31,7 @@ public class DeviceRepository : IDeviceRepository
     {
         try
         {
-            var device = _dbContext.Devices.SingleOrDefault(device => device.DeviceId == deviceId);
+            var device = _dbContext.Devices.SingleOrDefault(device => device.Id == deviceId);
             device!.Name = name;
             await _dbContext.SaveChangesAsync();
             return true;
@@ -100,7 +100,7 @@ public class DeviceRepository : IDeviceRepository
     {
         try
         {
-            var device = await _dbContext.Devices.SingleOrDefaultAsync(d => d.DeviceId == deviceId);
+            var device = await _dbContext.Devices.SingleOrDefaultAsync(d => d.Id == deviceId);
             return device is not null;
         }
         catch (Exception)
