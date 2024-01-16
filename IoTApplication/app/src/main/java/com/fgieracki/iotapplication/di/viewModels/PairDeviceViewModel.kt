@@ -129,6 +129,8 @@ class PairDeviceViewModel(private val repository: Repository = DefaultRepository
                         "Generated deviceKey:  " + getDeviceKey() + "AESKEY"
                     )
                     saveDataInSharedPrefs(getDeviceKey() + "AESIV", ivKey)
+
+
                     sendMessageToDevice(
                         ssid = ssid.value,
                         password = password.value,
@@ -205,5 +207,7 @@ class PairDeviceViewModel(private val repository: Repository = DefaultRepository
                 userId = userId,
 
             )
+    } else {
+        Log.d("PairDeviceViewModel", "chosenDevice is null")
     }
 }
