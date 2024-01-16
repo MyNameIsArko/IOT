@@ -28,7 +28,7 @@ public static class Program
         var mqttClient = mqttFactory.CreateMqttClient();
         // Use builder classes where possible in this project.
         var mqttClientOptions = new MqttClientOptionsBuilder()
-            .WithTcpServer("srv3.enteam.pl", 883)
+            .WithTcpServer("srv9.enteam.pl", 883)
             .WithCredentials("devicePublisher", "RVbySf#FV8*!xG4&o4j6")
             .WithClientId("client")
             .Build();

@@ -95,7 +95,7 @@ public class AuthController : Controller
             Token = token
         };
         
-        Console.WriteLine("Sending response: " + response);
+        Console.WriteLine($"Sending token and deviceKeys for user {user.UserName} login request");
         return Ok(response);
     }
 }

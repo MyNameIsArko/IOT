@@ -8,6 +8,6 @@ public class RegisterUserRequest
     
     public override string ToString()
     {
-        return $"RegisterUserRequest: UserName = {UserName}, Password = {Password}";
+        return $"RegisterUserRequest: UserName = {UserName}";
     }
 }
