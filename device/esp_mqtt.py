@@ -12,7 +12,7 @@ class ESPMQTTClient:
         # dwa topici, jeden temperature  i jeden humidity
         # topic to mac/temperature  mac/humidity
         self.client_id = ubinascii.hexlify(machine.unique_id())
-        self.mqtt_ip = "srv3.enteam.pl"
+        self.mqtt_ip = "srv9.enteam.pl"
         self.encryption = encryption
 
         mac = mac.upper()
