@@ -100,7 +100,7 @@ async def main():
     sensor = esp_sensor.DHT22()
 
     log.info("Starting MQTT client")
-    mqtt_client = esp_mqtt.Broker(config["mac"], sensor, encryption)
+    mqtt_client = esp_mqtt.ESPMQTTClient(config["mac"], sensor, encryption)
     while True:
         if mqtt_client.connect():
             mqtt_client.start_pushing()

@@ -7,7 +7,7 @@ import ulogging
 log = ulogging.getLogger("MQTT")
 
 
-class Broker:
+class ESPMQTTClient:
     def __init__(self, mac, sensor, encryption):
         # dwa topici, jeden temperature  i jeden humidity
         # topic to mac/temperature  mac/humidity
