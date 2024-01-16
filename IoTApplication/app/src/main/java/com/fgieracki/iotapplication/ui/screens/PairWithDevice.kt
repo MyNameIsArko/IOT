@@ -39,7 +39,7 @@ fun ScreenPairWithDevice(
     LaunchedEffect(Unit) {
         viewModel.toastChannel.collectLatest {
             Toast.makeText(context, it,
-                Toast.LENGTH_SHORT).show()
+                Toast.LENGTH_LONG).show()
         }
     }
 
