@@ -42,9 +42,7 @@ async def reset_if_not_exists(api_client, mac, esp_wifi):
     while True:
         await asyncio.sleep(60)
         if not esp_wifi.check_if_connected():
-            log.warning(
-                "No internet connection fault. Passively waiting for connection"
-            )
+            log.warning("Wifi not connected")
             continue
         log.info("Checking if device is registered")
         if not api_client.check_if_exists(mac):
