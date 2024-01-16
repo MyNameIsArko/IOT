@@ -25,3 +25,7 @@ def connect_to_wifi(ssid, password):
         log.info(f"Network config: {sta.ifconfig()}")
         return True
     return False
+
+
+def check_if_connected():
+    return sta.isconnected()

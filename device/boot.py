@@ -38,13 +38,16 @@ def get_config():
         return None
 
 
-async def reset_if_not_exists(api_client, mac):
+async def reset_if_not_exists(api_client, mac, esp_wifi):
     while True:
         await asyncio.sleep(60)
         log.info("Checking if device is registered")
         if not api_client.check_if_exists(mac):
-            log.info("Resetting device")
-            machine.reset()
+            if esp_wifi.check_if_connected():
+                log.warning("No internet connection fault")
+            else:
+                log.info("Resetting device")
+                machine.reset()
 
 
 async def main():
@@ -88,7 +91,7 @@ async def main():
         return
 
     log.info("Starting 'check if exist' task")
-    asyncio.create_task(reset_if_not_exists(api_client, config["mac"]))
+    asyncio.create_task(reset_if_not_exists(api_client, config["mac"], esp_wifi))
 
     log.info("Setup encrypion")
     encryption = esp_crypto.Encryption(config["aes_key"], config["aes_iv"])
