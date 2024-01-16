@@ -42,4 +42,4 @@ class APIClient:
                 return False
         except OSError:
             log.error("Error while sending 'if exists' request")
-            return True  # We return true as we don't want to reset device when server is down
+            return False
