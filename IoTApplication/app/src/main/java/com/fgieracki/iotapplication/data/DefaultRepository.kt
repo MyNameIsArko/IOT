@@ -57,5 +57,16 @@ class DefaultRepository : Repository() {
         return safeApiCall { api.deleteDevice(getToken(), DeviceMac(device.mac)) }
     }
 
+    override suspend fun getDevicesCount(): Resource<Long> {
+        val apiResponse = safeApiCall{ api.getDevices(token = getToken()) }
+        if(apiResponse is Resource.Success) {
+            val devices = apiResponse.data!!.devices.map { it.toDevice() }
+            return Resource.Success(devices.size.toLong())
+        }
+        else {
+            return Resource.Error(apiResponse.message!!, apiResponse.code!!)
+        }
+    }
+
 
 }
