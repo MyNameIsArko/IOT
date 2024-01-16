@@ -8,6 +8,9 @@ import uasyncio as asyncio
 import aioble
 import ubluetooth
 import aioble.core as core
+import bluetooth
+
+ble = bluetooth.BLE()
 
 import random
 import struct
@@ -84,6 +87,7 @@ async def read_data(characteristic):
 
     log.info("Received whole message")
     log.info(f'{whole_message=}')
+    ble.active(False)
     return whole_message
 
 
