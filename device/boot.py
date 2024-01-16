@@ -44,7 +44,9 @@ async def reset_if_not_exists(api_client, mac, esp_wifi):
         log.info("Checking if device is registered")
         if not api_client.check_if_exists(mac):
             if esp_wifi.check_if_connected():
-                log.warning("No internet connection fault")
+                log.warning(
+                    "No internet connection fault. Passively waiting for connection"
+                )
             else:
                 log.info("Resetting device")
                 machine.reset()
