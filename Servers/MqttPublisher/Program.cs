@@ -1,3 +1,4 @@
+using System.Security.Authentication;
 using MQTTnet;
 using MQTTnet.Client;
 
@@ -44,9 +45,20 @@ public static class Program
         var mqttClient = mqttFactory.CreateMqttClient();
         // Use builder classes where possible in this project.
         var mqttClientOptions = new MqttClientOptionsBuilder()
-            .WithTcpServer("localhost", 1883)
+            .WithTcpServer("localhost", 8883)
             .WithCredentials("devicePublisher", "RVbySf#FV8*!xG4&o4j6")
             .WithClientId("client")
+            .WithTlsOptions(
+                o =>
+                {
+                    // The used public broker sometimes has invalid certificates. This sample accepts all
+                    // certificates. This should not be used in live environments.
+                    o.WithCertificateValidationHandler(_ => true);
+
+                    // The default value is determined by the OS. Set manually to force version.
+                    o.WithSslProtocols(SslProtocols.Tls12);
+                    o.UseTls();
+                })
             .Build();
         
 
