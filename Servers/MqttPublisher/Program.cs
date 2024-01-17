@@ -1,4 +1,3 @@
-using System.Text;
 using MQTTnet;
 using MQTTnet.Client;
 
@@ -9,6 +8,23 @@ public static class Program
     public static async Task Main(string[] args)
     {
         var client = await ConnectClient();
+
+        client.ApplicationMessageReceivedAsync += delegate(MqttApplicationMessageReceivedEventArgs args)
+        {
+            Console.WriteLine(System.Text.Encoding.Default.GetString(args.ApplicationMessage.PayloadSegment));
+            return Task.CompletedTask;
+        };
+        
+        var mqttSubscribeOptions = new MqttFactory().CreateSubscribeOptionsBuilder()
+            .WithTopicFilter(
+                f =>
+                {
+                    f.WithTopic("DUPA/Disconnect");
+                }
+            )
+            .Build();
+        
+        await client.SubscribeAsync(mqttSubscribeOptions);
 
         SendMessages(client);
 
@@ -28,7 +44,7 @@ public static class Program
         var mqttClient = mqttFactory.CreateMqttClient();
         // Use builder classes where possible in this project.
         var mqttClientOptions = new MqttClientOptionsBuilder()
-            .WithTcpServer("srv9.enteam.pl", 883)
+            .WithTcpServer("localhost", 1883)
             .WithCredentials("devicePublisher", "RVbySf#FV8*!xG4&o4j6")
             .WithClientId("client")
             .Build();
@@ -50,18 +66,18 @@ public static class Program
     {
         do
         {
-            Console.WriteLine("Write your message!");
-            var message = Console.ReadLine();
-
-            Console.WriteLine("Now name topic:");
-            var topic = Console.ReadLine();
-
-            var messageBytes = Encoding.UTF8.GetBytes(message!);
-            mqttClient.PublishBinaryAsync(topic, messageBytes);
-
-            // mqttClient.PublishStringAsync(topic, message);
-            
-            Console.WriteLine("Message sent. Continue or press Q to quit");
+            // Console.WriteLine("Write your message!");
+            // var message = Console.ReadLine();
+            //
+            // Console.WriteLine("Now name topic:");
+            // var topic = Console.ReadLine();
+            //
+            // var messageBytes = Encoding.UTF8.GetBytes(message!);
+            // mqttClient.PublishBinaryAsync(topic, messageBytes);
+            //
+            // Console.WriteLine("Message sent. Continue or press Q to quit");
+            //wait 5 sec
+            Task.Delay(TimeSpan.FromSeconds(5)).Wait();
         } while (Console.ReadKey().Key != ConsoleKey.Q);
     }
 }

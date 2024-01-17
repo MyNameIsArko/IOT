@@ -138,6 +138,17 @@ public class Listener
         await _client.SubscribeAsync(mqttSubscribeOptions);
     }
 
+    public async void SendDisconnectMessage()
+    {
+        var topic = $"{_device.Mac}/Disconnect";
+        var message = new MqttApplicationMessageBuilder()
+            .WithTopic(topic)
+            .WithPayload("The device has been removed")
+            .Build();
+
+        await _client.PublishAsync(message);
+    }
+
     public async void CleanDisconnect()
     {
         _isListening = false;

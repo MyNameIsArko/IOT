@@ -243,22 +243,6 @@ public class DeviceController : Controller
         Console.WriteLine("Sending response: " + "Token could not be added");
         return BadRequest(new MessageResponse("Token could not be added"));
     }
-    
-    [AllowAnonymous]
-    [HttpGet("exists")]
-    public async Task<ActionResult<string>> DoesDeviceExist([FromBody] CheckDeviceRequest request)
-    {
-        Console.WriteLine("Check device request received: " + request);
-        
-        if (await _deviceRepository.GetDevice(request.Mac) is null)
-        {
-            Console.WriteLine($"Sending response: Device with Mac {request.Mac} does not exist in the database"); 
-            return NotFound($"Device with Mac {request.Mac} does not exist in the database");
-        }
-
-        Console.WriteLine($"Sending response: Device with Mac {request.Mac} exists in the database");
-        return Ok($"Device with Mac {request.Mac} exists in the database");
-    }
 
     private async Task<IdentityUser?> GetUserFromToken(IHeaderDictionary headers)
     {

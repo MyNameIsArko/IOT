@@ -69,6 +69,7 @@ public class ListenersManager : IListenersManager
 
         try
         {
+            listener.SendDisconnectMessage();
             listener.CleanDisconnect();
         }
         catch (Exception e)
