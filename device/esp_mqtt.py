@@ -62,6 +62,8 @@ class ESP32MQTTClient:
                 await asyncio.sleep(5)
             except OSError:
                 log.warning("Failed to push data to MQTT broker. Reconnecting")
+                self.client = None
+                break
 
     # Listen for disconnect message and if present remove config and restart device
     def listen_for_disconnect(self):
