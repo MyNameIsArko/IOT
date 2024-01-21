@@ -53,6 +53,11 @@ class BLEManager {
         return bluetoothAdapter!!.isEnabled
     }
 
+    private fun encryptMessage(message: String, key: String, iv: String): String {
+        val encryptionManager = EncryptionManager();
+        return encryptionManager.encrypt(message, key, iv)
+    }
+
     fun getScannedDevices(): Flow<List<AndroidAdvertisement>> = scanner
         .advertisements
         .onStart {
@@ -78,7 +83,7 @@ class BLEManager {
         val peripheral = scope
             .peripheral(advertisement = advertisement) {
                 onServicesDiscovered {
-                    requestMtu(998)
+                    requestMtu(2000)
                 }
             }
 
@@ -106,31 +111,37 @@ class BLEManager {
             }.getOrNull(0)
         } ?: throw IllegalArgumentException("No read characteristics found")
 
+
+        val hardcodedKey = "1811035398261360";
+        val hardcodedIV = "8197555279945598";
+
+//        encryptMessage(ssid, hardcodedKey, hardcodedIV)
+
         val textToSend =
-            "START{\"ssid\":\"$ssid\"," +
-            "\"password\":\"$password\"," +
-            "\"user_id\":\"$userId\"," +
-            "\"mac\":\"${advertisement.address}\"," +
-            "\"token\":\"${token}\"," +
-            "\"aes_key\":\"${aesKey}\"," +
-            "\"aes_iv\":\"${aesIV}\"}END"
+            "S{${encryptMessage(ssid, hardcodedKey, hardcodedIV)},"+
+            "${encryptMessage(password, hardcodedKey, hardcodedIV)}," +
+            "${userId}," +
+            "${advertisement.address}," +
+            "${token}," +
+            "${aesKey}," +
+            "${aesIV}}E"
 
         Log.d("BLEManager", "Sending: $textToSend")
 
         for(i in 0..textToSend.length step 20) {
             Log.d("BLEManager", "Sending: ")
             Log.d("BLEManager", textToSend.substring(i, (i + 20).coerceAtMost(textToSend.length)))
+            // send message to characteristic async
             peripheral.write(
                 characteristic = writeCharacteristics,
                 textToSend.substring(i, (i + 20).coerceAtMost(textToSend.length)).toByteArray(),
             )
-            sleep(100)
         }
 
         Log.i("BLEManager", "Write success, waiting for disconnect")
 
         val response =
-            peripheral.read(readCharacteristics).also {
+            peripheral.read(writeCharacteristics).also {
                 it.forEach {
                     Log.d("BLEManager", "$it")
                 }

@@ -28,6 +28,7 @@ class PairDeviceViewModel(private val repository: Repository = DefaultRepository
 
     private val _toastChannel = MutableSharedFlow<String>(extraBufferCapacity = 1)
     val toastChannel = _toastChannel
+    val isLoading = MutableStateFlow<Boolean>(false)
 
     private var chosenDevice: AndroidAdvertisement? = null
     val ssid: MutableStateFlow<String> = MutableStateFlow("")
@@ -106,6 +107,7 @@ class PairDeviceViewModel(private val repository: Repository = DefaultRepository
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
+                isLoading.value = true
                 val response = repository.generateToken(TokenData(token, encryptionKey, ivKey))
                 toastChannel.emit("Connecting with server...")
                 if (response is Resource.Error) {
@@ -139,7 +141,7 @@ class PairDeviceViewModel(private val repository: Repository = DefaultRepository
                         aesIV = ivKey,
                         userId = userId,
                     )
-                    for(i in 1..20) {
+                    for(i in 1..10) {
                         Thread.sleep(1000)
                         if (repository.getDevicesCount().data ?: 0 > initDevicesCount) {
                             toastChannel.emit("Added device successfully")
@@ -151,6 +153,7 @@ class PairDeviceViewModel(private val repository: Repository = DefaultRepository
 //                    Log.i("PairDeviceViewModel", "finalDevicesCount: $finalDevicesCount")
 
 //                    if (initDevicesCount == finalDevicesCount) {
+                        isLoading.value = false
                         toastChannel.emit("Something went wrong")
                         navChannel.emit("BACK")
                         return@launch
@@ -159,11 +162,13 @@ class PairDeviceViewModel(private val repository: Repository = DefaultRepository
 //                        navChannel.emit("BACK")
 //                    }
                 } else {
+                    isLoading.value = false
                     toastChannel.emit("Something went wrong")
                     navChannel.emit("BACK")
                     return@launch
                 }
             } catch (e: Exception) {
+                isLoading.value = false
                 toastChannel.emit("Something went wrong")
                 navChannel.emit("BACK")
                 return@launch
