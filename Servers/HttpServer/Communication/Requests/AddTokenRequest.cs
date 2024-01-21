@@ -10,8 +10,6 @@ public class AddTokenRequest
     
     public override string ToString()
     {
-        return $"AddTokenRequest: Value = {Value}" +
-               $"Key = {Key}, " +
-               $"IV = {IV}";
+        return $"AddTokenRequest: Value = {Value}";
     }
 }

@@ -126,7 +126,7 @@ public class DeviceController : Controller
             return Unauthorized(new MessageResponse($"User: {user.UserName} is not the owner of device with mac: {request.Mac}"));
         }
 
-        var result = await _deviceRepository.UpdateDeviceName(device.DeviceId, request.Name);
+        var result = await _deviceRepository.UpdateDeviceName(device.Id, request.Name);
         if (!result)
         {
             Console.WriteLine("Sending response: " + "Could not change device name");
@@ -196,8 +196,8 @@ public class DeviceController : Controller
         List<DeviceResponse> response = new();
         foreach (var device in devices)
         {
-            var temperature = await _topicDataRepository.GetLastDataUpdate(device.DeviceId, Topic.Temperature);
-            var humidity = await _topicDataRepository.GetLastDataUpdate(device.DeviceId, Topic.Humidity);
+            var temperature = await _topicDataRepository.GetLastDataUpdate(device.Id, Topic.Temperature);
+            var humidity = await _topicDataRepository.GetLastDataUpdate(device.Id, Topic.Humidity);
             response.Add(new DeviceResponse
             {
                 Mac = device.Mac,
@@ -242,22 +242,6 @@ public class DeviceController : Controller
         
         Console.WriteLine("Sending response: " + "Token could not be added");
         return BadRequest(new MessageResponse("Token could not be added"));
-    }
-    
-    [AllowAnonymous]
-    [HttpGet("exists")]
-    public async Task<ActionResult<string>> DoesDeviceExist([FromBody] CheckDeviceRequest request)
-    {
-        Console.WriteLine("Check device request received: " + request);
-        
-        if (await _deviceRepository.GetDevice(request.Mac) is null)
-        {
-            Console.WriteLine($"Sending response: Device with Mac {request.Mac} does not exist in the database"); 
-            return NotFound($"Device with Mac {request.Mac} does not exist in the database");
-        }
-
-        Console.WriteLine($"Sending response: Device with Mac {request.Mac} exists in the database");
-        return Ok($"Device with Mac {request.Mac} exists in the database");
     }
 
     private async Task<IdentityUser?> GetUserFromToken(IHeaderDictionary headers)

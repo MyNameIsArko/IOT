@@ -15,6 +15,14 @@ public class ServerDbContext : Microsoft.EntityFrameworkCore.DbContext
         AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
     }
     
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Device>()
+            .HasMany(d => d.TopicData)
+            .WithOne(td => td.Device)
+            .HasForeignKey(td => td.DeviceId);
+    }
+    
     public async void CheckDatabaseConnection()
     {
         while (true)

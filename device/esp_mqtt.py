@@ -1,6 +1,6 @@
 from umqttsimple import MQTTClient
 import machine
-import time
+import asyncio
 import ubinascii
 import ulogging
 
@@ -42,30 +42,28 @@ class ESP32MQTTClient:
             log.warning("Failed to connect to MQTT broker. Reconnecting")
             return False
 
-    def start_pushing(self):
+    async def start_pushing(self):
         assert self.client is not None, "MQTT client is not connected"
         log.info("Starting pushing data to MQTT broker")
 
-        last_message = 0
-        message_interval = 5
-
         while True:
             try:
-                if (time.time() - last_message) > message_interval:
-                    json_measurements = self.sensor.get_measurement()
+                json_measurements = self.sensor.get_measurement()
 
-                    temperature_txt = str(json_measurements["temperature"]).encode('utf-8')
-                    temperature_msg = self.encryption.encrypt(temperature_txt)
+                temperature_txt = str(json_measurements["temperature"]).encode("utf-8")
+                temperature_msg = self.encryption.encrypt(temperature_txt)
 
-                    humidity_txt = str(json_measurements["humidity"]).encode('utf-8')
-                    humidity_msg = self.encryption.encrypt(humidity_txt)
+                humidity_txt = str(json_measurements["humidity"]).encode("utf-8")
+                humidity_msg = self.encryption.encrypt(humidity_txt)
 
-                    self.client.publish(self.temperature_topic, temperature_msg)
-                    self.client.publish(self.humidity_topic, humidity_msg)
-                    log.info("Sent data to MQTT broker")
-                    last_message = time.time()
+                self.client.publish(self.temperature_topic, temperature_msg)
+                self.client.publish(self.humidity_topic, humidity_msg)
+                log.info("Sent data to MQTT broker")
+                await asyncio.sleep(5)
             except OSError:
                 log.warning("Failed to push data to MQTT broker. Reconnecting")
+                self.client = None
+                break
 
     # Listen for disconnect message and if present remove config and restart device
     def listen_for_disconnect(self):

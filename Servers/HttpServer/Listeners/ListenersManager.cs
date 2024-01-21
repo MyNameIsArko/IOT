@@ -36,7 +36,7 @@ public class ListenersManager : IListenersManager
     
     public async Task<bool> AddListenerToDevice(Device device)
     {
-        if (!await _deviceRepository.DoesDeviceExist(device.DeviceId) || Listeners.Any(list => list.IsListeningToDevice(device)))
+        if (!await _deviceRepository.DoesDeviceExist(device.Id) || Listeners.Any(list => list.IsListeningToDevice(device)))
         {
             return false;
         }
@@ -69,6 +69,7 @@ public class ListenersManager : IListenersManager
 
         try
         {
+            listener.SendDisconnectMessage();
             listener.CleanDisconnect();
         }
         catch (Exception e)
