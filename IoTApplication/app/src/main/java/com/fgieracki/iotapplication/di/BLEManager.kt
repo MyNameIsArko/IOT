@@ -117,14 +117,10 @@ class BLEManager {
 
 //        encryptMessage(ssid, hardcodedKey, hardcodedIV)
 
+        val textToHash = "${ssid},${password},${userId},${advertisement.address},${token},${aesKey},${aesIV}"
+
         val textToSend =
-            "S{${encryptMessage(ssid, hardcodedKey, hardcodedIV)},"+
-            "${encryptMessage(password, hardcodedKey, hardcodedIV)}," +
-            "${userId}," +
-            "${advertisement.address}," +
-            "${token}," +
-            "${aesKey}," +
-            "${aesIV}}E"
+            "S{${encryptMessage(textToHash, hardcodedKey, hardcodedIV)}}E"
 
         Log.d("BLEManager", "Sending: $textToSend")
 
