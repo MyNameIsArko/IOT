@@ -3,6 +3,7 @@ import machine
 import asyncio
 import ubinascii
 import ulogging
+import os
 
 log = ulogging.getLogger("MQTT")
 
@@ -20,7 +21,17 @@ class ESP32MQTTClient:
         self.temperature_topic = f"{mac}/Temperature"
         self.humidity_topic = f"{mac}/Humidity"
         self.disconnect_topic = f"{mac}/Disconnect"
+        self.disconnect_user_topic = f"{mac}/DisconnectUser"
         self.sensor = sensor
+
+        with open("ca.crt", "r") as file:
+            self.cert_data = file.read()
+
+        with open("client.key", "r") as file:
+            self.client_key = file.read()
+
+        with open("client.crt", "r") as file:
+            self.client_cert = file.read()
 
         self.client = None
 
@@ -32,6 +43,12 @@ class ESP32MQTTClient:
             port=883,
             user="devicePublisher",
             password="RVbySf#FV8*!xG4&o4j6",
+            # ssl=True,
+            # ssl_params={
+            #     "cert": self.cert_data,
+            #     "key": self.client_key,
+            #     "ca_certs": self.client_cert,
+            # },
         )
         try:
             client.connect()
@@ -66,18 +83,31 @@ class ESP32MQTTClient:
                 break
 
     # Listen for disconnect message and if present remove config and restart device
-    def listen_for_disconnect(self):
+    async def listen_for_disconnect(self):
         assert self.client is not None, "MQTT client is not connected"
         log.info("Listening for disconnect message")
         self.client.set_callback(self.disconnect_callback)
         self.client.subscribe(self.disconnect_topic)
+        while True:
+            try:
+                self.client.check_msg()
+                await asyncio.sleep(1)
+            except OSError:
+                log.warning("Failed to listen for disconnect message. Reconnecting")
+                self.client = None
+                break
 
     def disconnect_callback(self, topic, msg):
         log.info("Disconnect message received")
-        if str(msg, "utf-8") == self.client_id:
-            log.info("Removing config and restarting device")
-            try:
-                os.remove("config.json")
-            except OSError:
-                pass
-            machine.reset()
+        log.info("Removing config and restarting device")
+        try:
+            os.remove("config.json")
+        except OSError:
+            pass
+        machine.reset()
+
+    def send_disconnect(self):
+        assert self.client is not None, "MQTT client is not connected"
+        log.info("Sending disconnect message")
+        self.client.publish(self.disconnect_user_topic, self.user_id)
+        self.client.disconnect()

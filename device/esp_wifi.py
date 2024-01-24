@@ -10,9 +10,9 @@ log = ulogging.getLogger("WIFI")
 
 async def connect_to_wifi(ssid, password):
     log.info("Connecting to the network")
+    # log.info(f"'{ssid}' '{password}'")
     sta.active(True)
     await asyncio.sleep(1)
-    log.info(f"'{ssid}', '{password}'")
     sta.connect(ssid, password)
     timer = 0
     while not sta.isconnected():
