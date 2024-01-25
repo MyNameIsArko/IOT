@@ -81,9 +81,6 @@ var serverDb = serviceScope.ServiceProvider.GetRequiredService<ServerDbContext>(
 await authDb.Database.EnsureCreatedAsync();
 await serverDb.Database.EnsureCreatedAsync();
 
-authDb.CheckDatabaseConnection();
-serverDb.CheckDatabaseConnection();
-
 var listenersManager = serviceScope.ServiceProvider.GetRequiredService<IListenersManager>();
 await listenersManager.ConnectDevices();
 

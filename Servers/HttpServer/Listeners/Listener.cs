@@ -1,4 +1,5 @@
-﻿using HttpServer.Configuration;
+﻿using System.Security.Cryptography.X509Certificates;
+using HttpServer.Configuration;
 using HttpServer.Data.Models;
 using HttpServer.Repositories;
 using MQTTnet;
@@ -12,20 +13,23 @@ public class Listener
 
     private readonly IServiceScope _serviceScope;
     
+    private readonly IListenersManager _listenersManager;
+
     private readonly MqttOptions _mqttOptions;
 
-    private readonly Device _device;
+    public Device Device { get; set; }
 
     private readonly IMqttClient _client;
 
-    private bool _isListening = true;
+    public bool IsListening = true;
 
-    public Listener(IServiceScope serviceScope, Device device)
+    public Listener(IServiceScope serviceScope, Device device, IListenersManager listenersManager)
     {
         _serviceScope = serviceScope;
+        _listenersManager = listenersManager;
         _topicDataRepository = serviceScope.ServiceProvider.GetRequiredService<ITopicDataRepository>();
         _mqttOptions = AppConfiguration.GetMqttOptions();
-        _device = device;
+        Device = device;
 
         try
         {
@@ -39,7 +43,7 @@ public class Listener
 
     public bool IsListeningToDevice(Device device)
     {
-        return device.Id == _device.Id;
+        return device.Id == Device.Id;
     }
 
     public void StartListening()
@@ -47,7 +51,7 @@ public class Listener
         Task.Run(
             async () =>
             {
-                while (_isListening)
+                while (IsListening)
                 {
                     try
                     {
@@ -72,24 +76,36 @@ public class Listener
     {
         try
         {
-            Console.WriteLine($"Trying to connect client for device {_device.Mac} to server");
+            Console.WriteLine($"Trying to connect client for device {Device.Mac} to server");
+            
+            string certFilePath = "/certificates/http.pfx";
+            string password = "RVbySf#FV8*!xG4&o4j6";
+
+            var certs = new List<X509Certificate2>
+            {
+                new (certFilePath, password)
+            };
             
             var mqttClientOptions = new MqttClientOptionsBuilder()
-                .WithClientId($"C#Client-{_device.Mac}")
+                .WithClientId($"https-{Device.Mac}")
                 .WithCredentials("devicePublisher", "RVbySf#FV8*!xG4&o4j6")
                 .WithTcpServer(_mqttOptions.IpAddress, _mqttOptions.Port)
+                .WithTlsOptions(o =>
+                {
+                    o.UseTls();
+                    o.WithClientCertificates(certs);
+                    o.WithCertificateValidationHandler(_ => true);
+                })
                 .WithCleanSession()
-                .WithRequestProblemInformation(false)
-                .WithTryPrivate(false)
                 .Build();
             
             await _client.ConnectAsync(mqttClientOptions);
             
-            Console.WriteLine($"Client for device {_device.Mac} connected to server");
+            Console.WriteLine($"Client for device {Device.Mac} connected to server");
         }
         catch (Exception e)
         {
-            Console.WriteLine($"Client for device {_device.Mac} could not be connected. Error message: {e.Message}");
+            Console.WriteLine($"Client for device {Device.Mac} could not be connected. Error message: {e.Message}");
             return;
         }
 
@@ -97,13 +113,14 @@ public class Listener
         {
             HandleReceivingMessages(topic);
         }
+        HandleDisconnectMessage();
     }
 
     private async void HandleReceivingMessages(Topic topic)
     {
-        Console.WriteLine($"Client for device {_device.Mac} is trying to subscribe to topic {topic}");
+        Console.WriteLine($"Client for device {Device.Mac} is trying to subscribe to topic {topic}");
         
-        var topicName = $"{_device.Mac}/{topic}";
+        var topicName = $"{Device.Mac}/{topic}";
 
         _client.ApplicationMessageReceivedAsync += delegate(MqttApplicationMessageReceivedEventArgs args)
         {
@@ -115,8 +132,7 @@ public class Listener
             var topicData = new TopicData
             {
                 Topic = topic,
-                DeviceId = _device.Id,
-                Device = _device,
+                DeviceId = Device.Id,
                 Data = value,
                 CreatedAt = DateTime.Now
             };
@@ -137,10 +153,38 @@ public class Listener
         
         await _client.SubscribeAsync(mqttSubscribeOptions);
     }
+    
+    private async void HandleDisconnectMessage()
+    {
+        Console.WriteLine($"Client for device {Device.Mac} is trying to subscribe to topic {Device.Mac}/DisconnectUser");
+        
+        var topicName = $"{Device.Mac}/DisconnectUser";
+
+        _client.ApplicationMessageReceivedAsync += delegate(MqttApplicationMessageReceivedEventArgs args)
+        {
+            if (topicName != args.ApplicationMessage.Topic) return Task.CompletedTask;
+            Console.WriteLine($"Client for device {Device.Mac} received disconnect message");
+
+            _listenersManager.RemoveListener(Device);
+            
+            return Task.CompletedTask;
+        };
+
+        var mqttSubscribeOptions = new MqttFactory().CreateSubscribeOptionsBuilder()
+            .WithTopicFilter(
+                f =>
+                {
+                    f.WithTopic(topicName);
+                }
+            )
+            .Build();
+        
+        await _client.SubscribeAsync(mqttSubscribeOptions);
+    }
 
     public async void SendDisconnectMessage()
     {
-        var topic = $"{_device.Mac}/Disconnect";
+        var topic = $"{Device.Mac}/Disconnect";
         var message = new MqttApplicationMessageBuilder()
             .WithTopic(topic)
             .WithPayload("The device has been removed")
@@ -151,7 +195,7 @@ public class Listener
 
     public async void CleanDisconnect()
     {
-        _isListening = false;
+        IsListening = false;
         
         await _client.DisconnectAsync(
             new MqttClientDisconnectOptionsBuilder()

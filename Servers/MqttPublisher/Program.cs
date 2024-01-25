@@ -1,4 +1,5 @@
-using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using MQTTnet;
 using MQTTnet.Client;
 
@@ -44,21 +45,26 @@ public static class Program
 
         var mqttClient = mqttFactory.CreateMqttClient();
         // Use builder classes where possible in this project.
-        var mqttClientOptions = new MqttClientOptionsBuilder()
-            .WithTcpServer("localhost", 8883)
-            .WithCredentials("devicePublisher", "RVbySf#FV8*!xG4&o4j6")
-            .WithClientId("client")
-            .WithTlsOptions(
-                o =>
-                {
-                    // The used public broker sometimes has invalid certificates. This sample accepts all
-                    // certificates. This should not be used in live environments.
-                    o.WithCertificateValidationHandler(_ => true);
+            
+        string certFilePath = "../Certificates/http.pfx";
+        string password = "RVbySf#FV8*!xG4&o4j6";
 
-                    // The default value is determined by the OS. Set manually to force version.
-                    o.WithSslProtocols(SslProtocols.Tls12);
-                    o.UseTls();
-                })
+        var certs = new List<X509Certificate2>
+        {
+            new (certFilePath)
+        };
+            
+        var mqttClientOptions = new MqttClientOptionsBuilder()
+            .WithClientId($"publ")
+            .WithCredentials("devicePublisher", "RVbySf#FV8*!xG4&o4j6")
+            .WithTcpServer("localhost", 1883)
+            .WithTlsOptions(o =>
+            {
+                o.UseTls();
+                o.WithClientCertificates(certs);
+                o.WithCertificateValidationHandler(_ => true);
+            })
+            .WithCleanSession()
             .Build();
         
 
@@ -78,16 +84,16 @@ public static class Program
     {
         do
         {
-            // Console.WriteLine("Write your message!");
-            // var message = Console.ReadLine();
-            //
-            // Console.WriteLine("Now name topic:");
-            // var topic = Console.ReadLine();
-            //
-            // var messageBytes = Encoding.UTF8.GetBytes(message!);
-            // mqttClient.PublishBinaryAsync(topic, messageBytes);
-            //
-            // Console.WriteLine("Message sent. Continue or press Q to quit");
+            Console.WriteLine("Write your message!");
+            var message = Console.ReadLine();
+            
+            Console.WriteLine("Now name topic:");
+            var topic = Console.ReadLine();
+            
+            var messageBytes = Encoding.UTF8.GetBytes(message!);
+            mqttClient.PublishBinaryAsync(topic, messageBytes);
+            
+            Console.WriteLine("Message sent. Continue or press Q to quit");
             //wait 5 sec
             Task.Delay(TimeSpan.FromSeconds(5)).Wait();
         } while (Console.ReadKey().Key != ConsoleKey.Q);

@@ -23,24 +23,12 @@ public class ServerDbContext : Microsoft.EntityFrameworkCore.DbContext
             .HasForeignKey(td => td.DeviceId);
     }
     
-    public async void CheckDatabaseConnection()
+    public async Task ConnectDatabase()
     {
-        while (true)
+        if (!await Database.CanConnectAsync())
         {
-            await Task.Delay(1000);
-            if (!await Database.CanConnectAsync())
-            {
-                try
-                {
-                    Console.WriteLine("Database disconnected. Trying to reconnect...");
-                    await Database.OpenConnectionAsync();
-                }
-                catch (Exception)
-                {
-                    Console.WriteLine("Cannot connect to DB");
-                    // ignored
-                }
-            }
+            Console.WriteLine("Database disconnected. Trying to reconnect...");
+            await Database.OpenConnectionAsync();
         }
     }
 

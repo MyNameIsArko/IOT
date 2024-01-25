@@ -29,10 +29,13 @@ public class MqttController
 
         if (eventArgs.UserName == "devicePublisher" && eventArgs.Password == "RVbySf#FV8*!xG4&o4j6")
         {
+            Console.WriteLine("Client authorized");
             return Task.CompletedTask;
         }
 
         eventArgs.ReasonCode = MQTTnet.Protocol.MqttConnectReasonCode.NotAuthorized;
-        return Task.FromException(new Exception("User not authorized"));
+        
+        Console.WriteLine("Client not authorized");
+        return Task.FromException(new Exception("Client not authorized"));
     }
 }

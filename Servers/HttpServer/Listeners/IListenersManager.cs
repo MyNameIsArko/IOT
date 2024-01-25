@@ -8,5 +8,5 @@ public interface IListenersManager
     
     Task<bool> AddListenerToDevice(Device device);
 
-    bool RemoveListener(Device device);
+    Task<bool> RemoveListener(Device device);
 }

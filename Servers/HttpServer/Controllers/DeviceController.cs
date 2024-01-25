@@ -1,6 +1,7 @@
 using HttpServer.Authentication;
 using HttpServer.Communication.Requests;
 using HttpServer.Communication.Responses;
+using HttpServer.Data.DbContext;
 using HttpServer.Data.Models;
 using HttpServer.Listeners;
 using HttpServer.Repositories;
@@ -27,12 +28,14 @@ public class DeviceController : Controller
     private readonly ITokenRepository _tokenRepository;
 
     private readonly IListenersManager _listenersManager;
+    
+    private readonly AuthDbContext _dbContext;
 
     private readonly ITokenService _tokenService;
 
     public DeviceController(UserManager<IdentityUser> userManager, IDeviceRepository deviceRepository,
         ITopicDataRepository topicDataRepository, ITokenRepository tokenRepository, ITokenService tokenService,
-        IListenersManager listenersManager)
+        IListenersManager listenersManager, AuthDbContext dbContext)
     {
         _userManager = userManager;
         _deviceRepository = deviceRepository;
@@ -40,6 +43,7 @@ public class DeviceController : Controller
         _tokenRepository = tokenRepository;
         _tokenService = tokenService;
         _listenersManager = listenersManager;
+        _dbContext = dbContext;
     }
     
     [AllowAnonymous]
@@ -254,19 +258,20 @@ public class DeviceController : Controller
         var token = authHeader.ToString()["Bearer ".Length..].Trim();
 
         var userId = _tokenService.GetUserId(token);
-        var user = await _userManager.Users.FirstOrDefaultAsync(user => user.Id.Equals(userId));
-
-        return user;
+        
+        try
+        {
+            await _dbContext.ConnectDatabase();
+            return await _userManager.Users.FirstOrDefaultAsync(user => user.Id.Equals(userId));
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
     }
 
     private async Task<bool> RemoveDevice(Device device)
     {
-        var listenerRemoved = _listenersManager.RemoveListener(device);
-        if (!listenerRemoved)
-        {
-            return false;
-        }
-        
-        return await _deviceRepository.RemoveDevice(device);
+        return await _listenersManager.RemoveListener(device);
     }
 }

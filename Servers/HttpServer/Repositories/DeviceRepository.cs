@@ -17,6 +17,7 @@ public class DeviceRepository : IDeviceRepository
     {
         try
         {
+            await _dbContext.ConnectDatabase();
             await _dbContext.Devices.AddAsync(device);
             await _dbContext.SaveChangesAsync();
             return true;
@@ -31,6 +32,7 @@ public class DeviceRepository : IDeviceRepository
     {
         try
         {
+            await _dbContext.ConnectDatabase();
             var device = _dbContext.Devices.SingleOrDefault(device => device.Id == deviceId);
             device!.Name = name;
             await _dbContext.SaveChangesAsync();
@@ -46,6 +48,7 @@ public class DeviceRepository : IDeviceRepository
     {
         try
         {
+            await _dbContext.ConnectDatabase();
             _dbContext.Devices.Remove(device);
             await _dbContext.SaveChangesAsync();
             return true;
@@ -60,6 +63,7 @@ public class DeviceRepository : IDeviceRepository
     {
         try
         {
+            await _dbContext.ConnectDatabase();
             mac = mac.ToUpper();
             var device = await _dbContext.Devices.SingleOrDefaultAsync(d => d.Mac == mac);
             return device;
@@ -74,6 +78,7 @@ public class DeviceRepository : IDeviceRepository
     {
         try
         {
+            await _dbContext.ConnectDatabase();
             var devices = await _dbContext.Devices.ToListAsync();
             return devices;
         }
@@ -87,6 +92,7 @@ public class DeviceRepository : IDeviceRepository
     {
         try
         {
+            await _dbContext.ConnectDatabase();
             var devices = await _dbContext.Devices.Where(d => d.UserId.Equals(userId)).ToListAsync();
             return devices;
         }
@@ -100,6 +106,7 @@ public class DeviceRepository : IDeviceRepository
     {
         try
         {
+            await _dbContext.ConnectDatabase();
             var device = await _dbContext.Devices.SingleOrDefaultAsync(d => d.Id == deviceId);
             return device is not null;
         }

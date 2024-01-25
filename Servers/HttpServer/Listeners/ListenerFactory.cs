@@ -11,8 +11,8 @@ public class ListenerFactory : IListenerFactory
         _serviceProvider = serviceProvider;
     }
 
-    public Listener GetListener(Device device)
+    public Listener GetListener(Device device, IListenersManager listenersManager)
     {
-        return new Listener(_serviceProvider.CreateScope(), device);
+        return new Listener(_serviceProvider.CreateScope(), device, listenersManager);
     }
 }

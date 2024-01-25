@@ -4,5 +4,5 @@ namespace HttpServer.Listeners;
 
 public interface IListenerFactory
 {
-    Listener GetListener(Device device);
+    Listener GetListener(Device device, IListenersManager listenersManager);
 }

@@ -17,6 +17,7 @@ public class TopicDataRepository : ITopicDataRepository
     {
         try
         {
+            await _dbContext.ConnectDatabase();
             await _dbContext.TopicDatas.AddAsync(topicData);
             await _dbContext.SaveChangesAsync();
             return true;
@@ -31,6 +32,7 @@ public class TopicDataRepository : ITopicDataRepository
     {
         try
         {
+            await _dbContext.ConnectDatabase();
             var lastTopicData = await _dbContext.TopicDatas
                 .Where(td => td.DeviceId == deviceId && td.Topic == topic)
                 .OrderByDescending(t => t.CreatedAt)

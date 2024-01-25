@@ -48,7 +48,7 @@ public class ListenersManager : IListenersManager
     {
         try
         {
-            var listener = _listenerFactory.GetListener(device);
+            var listener = _listenerFactory.GetListener(device, this);
             listener.StartListening();
             Listeners.Add(listener);
 
@@ -61,7 +61,7 @@ public class ListenersManager : IListenersManager
         }
     }
 
-    public bool RemoveListener(Device device)
+    public async Task<bool> RemoveListener(Device device)
     {
         var listener = Listeners.SingleOrDefault(listener => listener.IsListeningToDevice(device));
 
@@ -71,6 +71,7 @@ public class ListenersManager : IListenersManager
         {
             listener.SendDisconnectMessage();
             listener.CleanDisconnect();
+            await _deviceRepository.RemoveDevice(device);
         }
         catch (Exception e)
         {

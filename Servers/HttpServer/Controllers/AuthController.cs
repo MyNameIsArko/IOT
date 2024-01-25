@@ -1,6 +1,7 @@
 using HttpServer.Authentication;
 using HttpServer.Communication.Requests;
 using HttpServer.Communication.Responses;
+using HttpServer.Data.DbContext;
 using HttpServer.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,12 +17,15 @@ public class AuthController : Controller
     private readonly ITokenService _tokenService;
     
     private readonly IDeviceRepository _deviceRepository;
+    
+    private readonly AuthDbContext _dbContext;
 
-    public AuthController(UserManager<IdentityUser> userManager, ITokenService tokenService, IDeviceRepository deviceRepository)
+    public AuthController(UserManager<IdentityUser> userManager, ITokenService tokenService, IDeviceRepository deviceRepository, AuthDbContext dbContext)
     {
         _userManager = userManager;
         _tokenService = tokenService;
         _deviceRepository = deviceRepository;
+        _dbContext = dbContext;
     }
     
     [HttpPost("register")]
@@ -33,7 +37,19 @@ public class AuthController : Controller
             UserName = request.UserName
         };
 
-        var registerResult = await _userManager.CreateAsync(identityUser, request.Password);
+        IdentityResult registerResult;
+        
+        try
+        {
+            await _dbContext.ConnectDatabase();
+            registerResult = await _userManager.CreateAsync(identityUser, request.Password);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Sending response: \"Cannot create user\"");
+            return BadRequest(new MessageResponse("Cannot create user"));
+        }
+
         if (!registerResult.Succeeded)
         {
             Console.WriteLine("Sending response: " + string.Join("\n", registerResult.Errors.Select(e => e.Description)));
@@ -52,11 +68,11 @@ public class AuthController : Controller
         IdentityUser? user;
         try
         {
+            await _dbContext.ConnectDatabase();
             user = await _userManager.FindByNameAsync(request.UserName);
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
             Console.WriteLine("Sending response: \"Cannot check user\"");
             return Unauthorized(new MessageResponse("Cannot check user"));
         }
@@ -70,11 +86,11 @@ public class AuthController : Controller
         bool result;
         try
         {
+            await _dbContext.ConnectDatabase();
             result = await _userManager.CheckPasswordAsync(user, request.Password);
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
             Console.WriteLine("Sending response: \"Cannot check password\"");
             return Unauthorized(new MessageResponse("Cannot check password"));
         }

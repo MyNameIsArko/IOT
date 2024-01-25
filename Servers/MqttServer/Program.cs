@@ -1,5 +1,3 @@
-using System.Net;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using MQTTnet.AspNetCore;
 
@@ -45,14 +43,20 @@ public static class Program
 
         public void ConfigureServices(IServiceCollection services)
         {
-            var certificate = CreateSelfSignedCertificate("1.3.6.1.4.1.65432.8765.4321.555.444.333.999.777.888");
+            string certFilePath = "Certificates/server.crt";
+            string password = "RVbySf#FV8*!xG4&o4j6";
+
+            var certificate = new X509Certificate2(certFilePath, password);
 
             services.AddHostedMqttServer(
                 optionsBuilder =>
                 {
-                    optionsBuilder.WithDefaultEndpointPort(8883)
+                    optionsBuilder
+                        .WithDefaultEndpointPort(8883)
                         .WithEncryptionCertificate(certificate)
                         .WithEncryptedEndpoint()
+                        .WithEncryptionSslProtocol(System.Security.Authentication.SslProtocols.Tls12)
+                        .WithClientCertificate()
                         .Build();
                 });
 
@@ -61,31 +65,5 @@ public static class Program
 
             services.AddSingleton<MqttController>();
         }
-    }
-
-    private static X509Certificate2 CreateSelfSignedCertificate(string oid)
-    {
-        var sanBuilder = new SubjectAlternativeNameBuilder();
-        sanBuilder.AddIpAddress(IPAddress.Loopback);
-        sanBuilder.AddIpAddress(IPAddress.IPv6Loopback);
-        sanBuilder.AddDnsName("localhost");
-
-        using var rsa = RSA.Create();
-        var certRequest = new CertificateRequest("CN=localhost", rsa, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1);
-
-        certRequest.CertificateExtensions.Add(
-            new X509KeyUsageExtension(X509KeyUsageFlags.DataEncipherment | X509KeyUsageFlags.KeyEncipherment | X509KeyUsageFlags.DigitalSignature, false));
-
-        certRequest.CertificateExtensions.Add(new X509EnhancedKeyUsageExtension(new OidCollection { new(oid) }, false));
-
-        certRequest.CertificateExtensions.Add(sanBuilder.Build());
-
-        using var certificate = certRequest.CreateSelfSigned(DateTimeOffset.Now.AddMinutes(-10), DateTimeOffset.Now.AddYears(10));
-        var pfxCertificate = new X509Certificate2(
-            certificate.Export(X509ContentType.Pfx),
-            (string)null!,
-            X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.Exportable);
-
-        return pfxCertificate;
     }
 }

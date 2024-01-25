@@ -17,6 +17,7 @@ public class TokenRepository : ITokenRepository
     {
         try
         {
+            await _dbContext.ConnectDatabase();
             await _dbContext.Tokens.AddAsync(token);
             await _dbContext.SaveChangesAsync();
             return true;
@@ -31,6 +32,7 @@ public class TokenRepository : ITokenRepository
     {
         try
         {
+            await _dbContext.ConnectDatabase();
             return await _dbContext.Tokens.AnyAsync(t => t.Value == value && t.UserId == userId);
         }
         catch (Exception)
@@ -43,7 +45,9 @@ public class TokenRepository : ITokenRepository
     {
         try
         {
+            await _dbContext.ConnectDatabase();
             var token = await _dbContext.Tokens.FirstOrDefaultAsync(token => token.Value == value);
+            if (token is null) return null;
             _dbContext.Tokens.Remove(token);
             await _dbContext.SaveChangesAsync();
             return token;
