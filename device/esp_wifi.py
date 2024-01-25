@@ -1,5 +1,5 @@
 import network
-import time
+import asyncio
 import ulogging
 
 # Set up as wifi
@@ -10,9 +10,9 @@ log = ulogging.getLogger("WIFI")
 
 async def connect_to_wifi(ssid, password):
     log.info("Connecting to the network")
+    # log.info(f"'{ssid}' '{password}'")
     sta.active(True)
-    time.sleep(1)
-    log.info(f"'{ssid}', '{password}'")
+    await asyncio.sleep(1)
     sta.connect(ssid, password)
     timer = 0
     while not sta.isconnected():
@@ -20,9 +20,9 @@ async def connect_to_wifi(ssid, password):
             log.warning("Wifi doesn't exists or bad credentials.")
             sta.disconnect()
             sta.active(False)
-            time.sleep(1)
+            await asyncio.sleep(1)
             return False
-        time.sleep(1)
+        await asyncio.sleep(1)
         timer += 1
     if sta.isconnected():
         log.info("Connected to the network")

@@ -20,6 +20,7 @@ import com.fgieracki.iotapplication.di.viewModels.PairDeviceViewModel
 import com.fgieracki.iotapplication.ui.components.AddDeviceAppBar
 import com.fgieracki.iotapplication.ui.components.AddDeviceDialog
 import com.fgieracki.iotapplication.ui.components.AndroidDeviceList
+import com.fgieracki.iotapplication.ui.components.LoadingDialog
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,6 +35,7 @@ fun ScreenPairWithDevice(
     val ssid = viewModel.ssid.collectAsState(initial = "")
     val password = viewModel.password.collectAsState(initial = "")
     val addDeviceDialogState = remember { mutableStateOf(false) }
+    val isLoading = viewModel.isLoading.collectAsState()
 
     val context = LocalContext.current
     LaunchedEffect(Unit) {
@@ -64,6 +66,11 @@ fun ScreenPairWithDevice(
                     .fillMaxSize()
                     .padding(it)
             ) {
+
+                if(isLoading.value) {
+                    LoadingDialog()
+                }
+
                 Text(
                     text = "Choose device to pair with from the list below",
                     style = MaterialTheme.typography.headlineMedium,
