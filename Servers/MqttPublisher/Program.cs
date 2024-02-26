@@ -16,7 +16,7 @@ public static class Program
             Console.WriteLine(System.Text.Encoding.Default.GetString(args.ApplicationMessage.PayloadSegment));
             return Task.CompletedTask;
         };
-        
+
         var mqttSubscribeOptions = new MqttFactory().CreateSubscribeOptionsBuilder()
             .WithTopicFilter(
                 f =>
@@ -25,7 +25,7 @@ public static class Program
                 }
             )
             .Build();
-        
+
         await client.SubscribeAsync(mqttSubscribeOptions);
 
         SendMessages(client);
@@ -45,7 +45,7 @@ public static class Program
 
         var mqttClient = mqttFactory.CreateMqttClient();
         // Use builder classes where possible in this project.
-            
+
         string certFilePath = "../Certificates/http.pfx";
         string password = "RVbySf#FV8*!xG4&o4j6";
 
@@ -53,28 +53,22 @@ public static class Program
         {
             new (certFilePath)
         };
-            
+
         var mqttClientOptions = new MqttClientOptionsBuilder()
             .WithClientId($"publ")
             .WithCredentials("devicePublisher", "RVbySf#FV8*!xG4&o4j6")
             .WithTcpServer("localhost", 1883)
-            .WithTlsOptions(o =>
-            {
-                o.UseTls();
-                o.WithClientCertificates(certs);
-                o.WithCertificateValidationHandler(_ => true);
-            })
             .WithCleanSession()
             .Build();
-        
+
 
         // This will throw an exception if the server is not available.
-        // The result from this message returns additional data which was sent 
+        // The result from this message returns additional data which was sent
         // from the server. Please refer to the MQTT protocol specification for details.
         var response = await mqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
         //
         Console.WriteLine("The MQTT client is connected.");
-        
+
         Console.Write(response.ResponseInformation);
 
         return mqttClient;
@@ -86,13 +80,13 @@ public static class Program
         {
             Console.WriteLine("Write your message!");
             var message = Console.ReadLine();
-            
+
             Console.WriteLine("Now name topic:");
             var topic = Console.ReadLine();
-            
+
             var messageBytes = Encoding.UTF8.GetBytes(message!);
             mqttClient.PublishBinaryAsync(topic, messageBytes);
-            
+
             Console.WriteLine("Message sent. Continue or press Q to quit");
             //wait 5 sec
             Task.Delay(TimeSpan.FromSeconds(5)).Wait();

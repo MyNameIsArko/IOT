@@ -28,7 +28,7 @@ public class ListenersManager : IListenersManager
                 CreateListener(device);
             }
             catch (Exception e)
-            { 
+            {
                 Console.WriteLine("Cannot create listener: " + e.Message);
             }
         }
@@ -70,8 +70,7 @@ public class ListenersManager : IListenersManager
         try
         {
             listener.SendDisconnectMessage();
-            listener.CleanDisconnect();
-            await _deviceRepository.RemoveDevice(device);
+            await listener.CleanDisconnect();
         }
         catch (Exception e)
         {

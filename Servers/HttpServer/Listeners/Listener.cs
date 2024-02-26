@@ -22,12 +22,15 @@ public class Listener
     private readonly IMqttClient _client;
 
     public bool IsListening = true;
+    
+    private readonly IDeviceRepository _deviceRepository;
 
     public Listener(IServiceScope serviceScope, Device device, IListenersManager listenersManager)
     {
         _serviceScope = serviceScope;
         _listenersManager = listenersManager;
         _topicDataRepository = serviceScope.ServiceProvider.GetRequiredService<ITopicDataRepository>();
+        _deviceRepository = serviceScope.ServiceProvider.GetRequiredService<IDeviceRepository>();
         _mqttOptions = AppConfiguration.GetMqttOptions();
         Device = device;
 
@@ -193,7 +196,7 @@ public class Listener
         await _client.PublishAsync(message);
     }
 
-    public async void CleanDisconnect()
+    public async Task CleanDisconnect()
     {
         IsListening = false;
         
@@ -202,6 +205,8 @@ public class Listener
                 .WithReason(MqttClientDisconnectOptionsReason.NormalDisconnection)
                 .Build()
         );
+
+        await _deviceRepository.RemoveDevice(Device);
         
         _serviceScope.Dispose();
     }
